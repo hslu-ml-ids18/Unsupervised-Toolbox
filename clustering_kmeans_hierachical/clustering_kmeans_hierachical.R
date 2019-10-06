@@ -106,8 +106,21 @@ server <- function(input, output) {
           xlab ="Number of Clusters", 
           ylab ="Total within-cluster sum of squares")
         })
-        output$hierachical <- renderText({ 
-          "### Giuliano rules here"
+        output$hierachical <- renderText({  
+        
+        # ************
+        # HIERACHICAL 
+        # ************
+          scaled_data = as.matrix(scale(data))
+          
+          hc1= hclust(dist(scaled_data))
+          plot(hc1)
+          heatmap(scaled_data, Colv = F, scale = "none")
+          
+          thc1 = hclust(dist(t(scaled_data)))
+          plot(thc1)
+          
+        # *************
         })
 }
 
