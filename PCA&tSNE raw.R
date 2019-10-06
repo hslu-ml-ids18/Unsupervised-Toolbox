@@ -1,0 +1,64 @@
+dir.create("~/GitHub/Unsupervised-Toolbox", FALSE)
+setwd("~/GitHub/Unsupervised-Toolbox")
+library(shiny)
+raw = read.csv2("data.csv", header = TRUE, stringsAsFactors = F, dec = ".")
+data = raw[,3:length(raw)]
+
+rownames(data) = raw[,1]
+
+# Get mean and variance in every column of the dataset
+apply(data,2,mean)
+apply(data,2,var)
+
+### Principal Component Analysis
+
+#Computing PCA
+scaled_data = as.matrix(scale(data))
+data.prc <- prcomp(scaled_data)
+names(data.prc)
+
+#Standard deviation and means of the variables that were used for scaling prior to implementing PCA:
+data.prc$center
+data.prc$scale
+
+
+# Rotation matrix provides the principal component of the loadings.
+dim(data.prc$rotation)
+data.prc$rotation
+# x matrix provides the principal component of the scores.
+dim(data.prc$x)
+data.prc$x
+
+#Biplot
+biplot(data.prc, scale=0)
+
+
+#Get standard deviation and variance of PCA
+data.prc$sdev
+data.prc_var = data.prc$sdev^2
+data.prc_var
+
+# In order to compute the proportion of variance explained by each principal component (variance explained 
+#by each principal component / total variance explained by all four principal components)
+pve=data.prc_var/sum(data.prc_var)
+pve
+plot(pve,xlab="Principal Component",ylab="Proportion of Variance Explained",ylim=c(0,1),type='b')
+plot(cumsum(pve),xlab="PrincipalComponent",ylab="Cumulative Proportion of Variance
+Explained",ylim=c(0,1),type='b')
+
+###t-Distributed Stochastic Neighbor Embedding (tSNE)
+library(Rtsne)
+# Use table row names to label the datapoint later in the plot:
+data_label<-as.factor(rownames(data))
+
+#remove duplicates:
+data_unique <- unique(data)
+
+# Run tSNE:
+tSNEdata <- as.matrix(scale(data_unique))
+tsne <- Rtsne(tSNEdata, dims = 2,
+              perplexity=10, verbose=TRUE,
+              max_iter = 500)
+#plot the data:
+plot(tsne$Y)
+text(tsne$Y, labels=data_label)
