@@ -29,7 +29,8 @@ x1 <- 80+rnorm(20, mean=20, sd=10)
 ui <- fluidPage(
 
     # Application title
-    titlePanel("K Mean Clustering - 2Dim"),
+    titlePanel("Clustering a 2 dimensional .csv File with 3 columns(index, x, y)"),
+    br(),
 
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
@@ -50,44 +51,64 @@ ui <- fluidPage(
       sliderInput("k",
                         "Number of clusters:",
                         min = 1,
-                        max = 10,
+                        max = 20,
                         value = 3)
         ),
-
         # Show a plot of the generated distribution
         mainPanel(
-           plotOutput("distPlot")
+          # Output: Tabset w/ plot, summary, and table ----
+          tabsetPanel(type = "tabs",
+                      tabPanel("K-means", plotOutput("k_cluster"), plotOutput("k_cluster_total") ),
+                      tabPanel("Hierachical", textOutput("hierachical"))
+          )
+
         )
     )
 )
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-
-  
-        output$distPlot <- renderPlot({
-        # Choose Dataset (local, online, default, generate)
-        inFile <- input$file1
-        data <- switch(input$dataset,
-               default = data_def,
-               local = read.csv(file=inFile$datapath, header=TRUE, sep=","),
-               online = read.csv(url(input$file_online), header=TRUE, sep=","),
-               data_def)  
+        output$k_cluster <- renderPlot({
           
-        
-        #if (!is.null(inFile))
-        #  data <- read.csv(file=inFile$datapath, header=TRUE, sep=",")
-        
-        #data prep, only numeric
-        data <- data[ , purrr::map_lgl(data, is.numeric)]
-        data <- data[2:3]
-        # Run K-means
-        km.out <- kmeans(data,input$k,nstart =50)
-        plot (data, col =(km.out$cluster+1),
-        main ="K-Means Clustering" ,
-        xlab =names(data)[1] , ylab =names(data)[2] ,
-        pch =20 , cex =2)
-    })
+          # Choose Dataset (local, online, default, generate)
+          inFile <- input$file1
+          data <- switch(input$dataset,
+                 default = data_def,
+                 local = read.csv(file=inFile$datapath, header=TRUE, sep=","),
+                 online = read.csv(url(input$file_online), header=TRUE, sep=","),
+                 data_def)  
+          
+          # Data prep, only numeric
+          data <- data[ , purrr::map_lgl(data, is.numeric)]
+          
+          # Choose column 2 and 3, skipping column 1, assuming its an index.
+          data <- data[2:3]
+          
+          # Run K-means Plot
+          km.out <- kmeans(data,input$k,nstart =50)
+          plot (data, col =(km.out$cluster+1),
+          main ="K-Means Clustering" ,
+          xlab =names(data)[1] , ylab =names(data)[2] ,
+          pch =20 , cex =2)
+      
+        })
+        output$k_cluster_total <- renderPlot({    
+          # Run Total within-cluster sum of squares Plot
+          List_y <- list()
+          List_x <- list()
+          for (k in seq(1,input$k)){
+            km.out <- kmeans(data,k,nstart =50)
+            List_y[k] <- km.out$tot.withinss
+            List_x[k] <- k
+          }
+          plot(List_x, List_y,
+          typ = "b",
+          xlab ="Number of Clusters", 
+          ylab ="Total within-cluster sum of squares")
+        })
+        output$hierachical <- renderText({ 
+          "### Giuliano rules here"
+        })
 }
 
 # Run the application 
