@@ -42,7 +42,7 @@ data.prc_var
 #by each principal component / total variance explained by all four principal components)
 pve=data.prc_var/sum(data.prc_var)
 pve
-plot(pve,xlab="Principal Component",ylab="Proportion of Variance Explained",ylim=c(0,1),type='b')
+pcaplot <- plot(pve,xlab="Principal Component",ylab="Proportion of Variance Explained",ylim=c(0,1),type='b')
 plot(cumsum(pve),xlab="PrincipalComponent",ylab="Cumulative Proportion of Variance
 Explained",ylim=c(0,1),type='b')
 
@@ -60,5 +60,5 @@ tsne <- Rtsne(tSNEdata, dims = 2,
               perplexity=10, verbose=TRUE,
               max_iter = 500)
 #plot the data:
-plot(tsne$Y)
+tsneplot <- plot(tsne$Y)
 text(tsne$Y, labels=data_label)
