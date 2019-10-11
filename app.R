@@ -11,7 +11,6 @@ library(shiny)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-
     # Application title
     h1("Machine Learning 2 - Unsupervised Toolbox"),
     "by",
@@ -47,15 +46,11 @@ ui <- fluidPage(
 
         # Show a plot of the generated distribution
         mainPanel(
-           plotOutput('distPlot'),
-           #placeholder for data plot
            plotOutput('tsne_plot'),
            #  k-means clustering plot
            plotOutput('plot1'),
            # Absolutely-positioned panels
-           plotOutput('plot2'),
-           # Absolutely-positioned panels
-           plotOutput('plot3')
+           plotOutput('plot2', height = "800px", width = "900px")
         )
     )
 )
@@ -89,10 +84,6 @@ server <- function(input, output) {
                     col = topo.colors(200, alpha=0.5),
                     Colv=F, scale="none")
         })
-        
-        output$plot3 <- renderPlot({
-            plot(head(data, input$n), main="Foo")
-        }, bg = "#F5F5F5")
     
     
     # # Create a PCA plot of the dataset 
@@ -112,14 +103,6 @@ server <- function(input, output) {
     #               perplexity= sliderInput$Perplexity, verbose=TRUE,
     #               max_iter = sliderInput$Iteration)
     # })
-    output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white')
-    })
 }
 
 # Run the application 
