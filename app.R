@@ -47,11 +47,15 @@ ui <- fluidPage(
 
         # Show a plot of the generated distribution
         mainPanel(
-           plotOutput("distPlot"),
+           plotOutput('distPlot'),
            #placeholder for data plot
-           plotOutput("tsne_plot"),
+           plotOutput('tsne_plot'),
            #  k-means clustering plot
-           plotOutput('plot1')
+           plotOutput('plot1'),
+           # Absolutely-positioned panels
+           plotOutput('plot2'),
+           # Absolutely-positioned panels
+           plotOutput('plot3')
         )
     )
 )
@@ -78,7 +82,18 @@ server <- function(input, output) {
              col = clusters()$cluster,
              pch = 20, cex = 3)
         points(clusters()$centers, pch = 4, cex = 4, lwd = 4)
-    })    
+    })
+        output$plot2 <- renderPlot({
+            mtscaled <- as.matrix(scale(data))
+            heatmap(mtscaled,
+                    col = topo.colors(200, alpha=0.5),
+                    Colv=F, scale="none")
+        })
+        
+        output$plot3 <- renderPlot({
+            plot(head(data, input$n), main="Foo")
+        }, bg = "#F5F5F5")
+    
     
     # # Create a PCA plot of the dataset 
     # output$tsne_plot <- renderPlot({
