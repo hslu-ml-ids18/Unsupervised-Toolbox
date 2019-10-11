@@ -86,23 +86,24 @@ server <- function(input, output) {
         })
     
     
-    # # Create a PCA plot of the dataset 
-    # output$tsne_plot <- renderPlot({
-    # # Define a function to run tsna with input variables
-    # ###t-Distributed Stochastic Neighbor Embedding (tSNE)
-    # library(Rtsne)
-    # # Use table row names to label the datapoint later in the plot:
-    # data_label<-as.factor(rownames(data))
-    # 
-    # #remove duplicates:
-    # data_unique <- unique(data)
-    # 
-    # #  Run tSNE:
-    # tSNEdata <- as.matrix(scale(data_unique))
-    # tsne <- Rtsne(tSNEdata, dims = 2,
-    #               perplexity= sliderInput$Perplexity, verbose=TRUE,
-    #               max_iter = sliderInput$Iteration)
-    # })
+    # Create a PCA plot of the dataset
+        output$tsne_plot <- renderPlot({
+    # Define a function to run tsna with input variables
+    ###t-Distributed Stochastic Neighbor Embedding (tSNE)
+    library(Rtsne)
+    # Use table row names to label the datapoint later in the plot:
+    data_label<-as.factor(rownames(data))
+
+    #remove duplicates:
+    data_unique <- unique(data)
+
+    #  Run tSNE:
+    tSNEdata <- as.matrix(scale(data_unique))
+    tsne <- Rtsne(tSNEdata, dims = 2,
+                  perplexity= input$Perplexity, verbose=TRUE,
+                  max_iter = input$Iteration)
+    plot(tsne$Y)
+    text(tsne$Y, labels=data_label) })
 }
 
 # Run the application 
