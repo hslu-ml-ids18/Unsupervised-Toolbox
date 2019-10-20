@@ -3,9 +3,6 @@
 data_raw = read.csv2("data.csv", header = TRUE, stringsAsFactors = F, dec = ".")
 
 
-
-
-
 ##### SOM #####
 
 library(kohonen)
@@ -71,8 +68,7 @@ plot(som_model, type="codes")
 # the map. It is important to remember that the individual sample positions do not move from one visualisation to another, the 
 # map is simply coloured by different variables.
 
-plot(som_model, type = "property", property = som_model$codes, main=names(som_model$data))
-
+plot(som_model, type = "property", property = getCodes(som_model), main=names(som_model$data))
 
 ##### Clustering #####
 # Clustering can be performed on the SOM nodes to isolate groups of samples with similar metrics. Manual identification 
@@ -80,17 +76,16 @@ plot(som_model, type = "property", property = som_model$codes, main=names(som_mo
 # areas on the map. An estimate of the number of clusters that would be suitable can be ascertained using a kmeans algorithm 
 # and examing for an "elbow-point" in the plot of "within cluster sum of squares".  The Kohonen package documentation shows 
 # how a map can be clustered using hierachical clustering. The results of the clustering can be visualised using the SOM plot function again.
-mydata <- som_model$codes 
-wss <- (nrow(mydata)-1)*sum(apply(mydata,2,var)) 
-for (i in 2:15) {
-  wss[i] <- sum(kmeans(mydata, centers=i)$withinss)
-}
-plot(wss)
+tree <- as.dendrogram(hclust(dist(as.numeric(unlist(som_model$codes))))) 
+plot(tree, ylab = "Height (h)")
 
 ## use hierarchical clustering to cluster the codebook vectors
-som_cluster <- cutree(hclust(dist(som_model$codes)), 6)
+som_cluster <- cutree(hclust(dist(as.numeric(unlist(som_model$codes)))), h=2)
 # plot these results:
-plot(som_model, type="mapping", bgcol = pretty_palette[som_cluster], main = "Clusters") 
-add.cluster.boundaries(som_model, som_cluster)
-     
+pretty_palette <- c("#1f77b4", '#ff7f0e', '#2ca02c', '#d62728', 
+                    '#9467bd', '#8c564b', '#e377c2')
+plot(som_model, type="mapping",labels = (rownames(data)),
+     bgcol=pretty_palette[som_cluster], col=colors[row_label])
+add.cluster.boundaries(som_model,som_cluster)
+
      
