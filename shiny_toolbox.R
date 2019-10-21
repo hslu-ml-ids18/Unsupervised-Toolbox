@@ -26,6 +26,25 @@ data_def <- data.frame(i,x,y)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
+  tags$head(
+    tags$style(HTML("
+                    @import url('//fonts.googleapis.com/css?family=Lobster|Cabin:400,700');
+                    body {background-color: #c2d6d6;
+                    }
+                    h1 {
+                    font-family: 'Lobster';
+                    font-weight: 500;
+                    line-height: 1.1;
+                    color: #50;
+                    }
+                    strong {
+                    font-family: Helvetica, Arial;
+                    font-weight: bold;
+                    color: #50;
+                    }
+                    
+                    "))
+    ),
   # Application title
   h1("Machine Learning 2 - Unsupervised Toolbox"),
   "by",
@@ -49,28 +68,21 @@ ui <- fluidPage(
                   min = 2,
                   max = 20,
                   value = 5),
-      headerPanel('k-means clustering'),
-      sidebarPanel(
-        selectInput('xcol', 'X Variable', names(data)),
-        selectInput('ycol', 'Y Variable', names(data),
-                    selected=names(data)[[2]]),
-        numericInput('clusters', 'Cluster count', 3,
-                     min = 1, max = 9)
+      tags$hr(),
+      
+      fileInput("file_local", "Choose local CSV",
+                accept = c(
+                  "text/csv",
+                  "text/comma-separated-values,text/plain",
+                  ".csv")
       ),
-      sidebarPanel(
-        fileInput("file_local", "Choose local CSV",
-                  accept = c(
-                    "text/csv",
-                    "text/comma-separated-values,text/plain",
-                    ".csv")
-        ),
-        textInput("file_online", "Choose online CSV", "https://people.sc.fsu.edu/~jburkardt/data/csv/faithful.csv"),
-        
-        radioButtons("dataset", "Dataset:",
-                     c("Default" = "default",
-                       "Local" = "local",
-                       "Online" = "online")),
-        
+      textInput("file_online", "Choose online CSV", "https://people.sc.fsu.edu/~jburkardt/data/csv/faithful.csv"),
+      
+      radioButtons("dataset", "Dataset:",
+                   c("Default" = "default",
+                     "Local" = "local",
+                     "Online" = "online")),
+      
         tags$hr(),
         
         uiOutput("selected_input_x_col"),
@@ -87,8 +99,7 @@ ui <- fluidPage(
                     min = 1,
                     max = 20,
                     value = 3)
-      )
-          ),
+                ),
     
      # Show a plot of the generated distribution
     mainPanel(
