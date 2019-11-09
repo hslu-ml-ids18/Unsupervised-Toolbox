@@ -48,11 +48,12 @@ ui <- fluidPage(
   # Application title
   h1("Machine Learning 2 - Unsupervised Toolbox"),
   "by",
-  strong("Giuliano Ardesi, Lisa Becker, Anastasiia Chebatarova, Axel Kandel, Alexander Kushe"),
+  strong("Giuliano Ardesi, Lisa Becker, Anastasiia Chebatarova, Axel Kandel, Alexander Kusche"),
   
   # Sidebar with a slider input for number of bins 
   sidebarLayout(
     sidebarPanel(
+      conditionalPanel(condition = "input.tabs==3",
       sliderInput("Perplexity",
                   "Number of Perplexitys:",
                   min = 2,
@@ -68,8 +69,8 @@ ui <- fluidPage(
                   min = 2,
                   max = 20,
                   value = 5),
-      tags$hr(),
-      
+      tags$hr()),
+      conditionalPanel(condition = "input.tabs==1",
       fileInput("file_local", "Choose local CSV",
                 accept = c(
                   "text/csv",
@@ -83,8 +84,8 @@ ui <- fluidPage(
                      "Local" = "local",
                      "Online" = "online")),
       
-        tags$hr(),
-        
+        tags$hr()),
+      conditionalPanel(condition = "input.tabs==4",
         uiOutput("selected_input_x_col"),
         uiOutput("selected_input_y_col"),
         
@@ -99,16 +100,16 @@ ui <- fluidPage(
                     min = 1,
                     max = 20,
                     value = 3)
-                ),
+                )),
     
      # Show a plot of the generated distribution
     mainPanel(
       # Output: Tabset w/ plot, summary, and table ----
-      tabsetPanel(type = "tabs",
-                  tabPanel("DataSet", br(), verbatimTextOutput("summary"), verbatimTextOutput("strucutre"), tableOutput("view")),
+      tabsetPanel(type = "tabs", id = "tabs",
+                  tabPanel("DataSet", value=1, br(), verbatimTextOutput("summary"), verbatimTextOutput("strucutre"), tableOutput("view")),
                   tabPanel("PCA", plotOutput("pcaplot", width = "1200px"), plotOutput("pca_variance_plot", width = "1200px")),
-                  tabPanel("t-SNE", plotOutput("tsne_plot", height = "800px")),
-                  tabPanel("K-means", plotOutput("k_cluster"), plotOutput("k_cluster_total") ),
+                  tabPanel("t-SNE", value=3 , plotOutput("tsne_plot", height = "800px")),
+                  tabPanel("K-means", value=4, plotOutput("k_cluster"), plotOutput("k_cluster_total") ),
                   tabPanel("Absolutely-positioned panel", plotOutput("heatmap", height = "800px", width = "1200px")),
                   tabPanel("Tree", plotOutput("tree"))
       )
