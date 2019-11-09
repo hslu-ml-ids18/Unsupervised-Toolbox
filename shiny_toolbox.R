@@ -70,23 +70,33 @@ ui <- fluidPage(
                   min = 2,
                   max = 20,
                   value = 5),
+      
       tags$hr()),
+      
       conditionalPanel(condition = "input.tabs==1",
-      fileInput("file_local", "Choose local CSV",
+      fileInput("file_local",
+                "Choose local CSV",
                 accept = c(
                   "text/csv",
                   "text/comma-separated-values,text/plain",
                   ".csv")
       ),
-      textInput("file_online", "Choose online CSV", "https://people.sc.fsu.edu/~jburkardt/data/csv/faithful.csv"),
+      textInput("file_online",
+                "Choose online CSV",
+                "https://people.sc.fsu.edu/~jburkardt/data/csv/faithful.csv"),
       
-      radioButtons("dataset", "Dataset:",
+      radioButtons("dataset",
+                   "Dataset:",
                    c("Default" = "default",
                      "Local" = "local",
                      "Online" = "online")),
-      textInput("separator", "Choose a separator for your file", ","),
+      
+      textInput(inputId = "separator",
+                label = "Choose a separator for your file",
+                value = ","),
       
         tags$hr()),
+      
       conditionalPanel(condition = "input.tabs==4",
         uiOutput("selected_input_x_col"),
         uiOutput("selected_input_y_col"),
@@ -97,6 +107,7 @@ ui <- fluidPage(
                     min = 1,
                     max = 20,
                     value = 3),
+        
         sliderInput("tree_h",
                     "Height of tree:",
                     min = 1,
@@ -138,8 +149,6 @@ server <- function(input, output) {
   
   #output$selected_input_xclol <- renderText({names(datasetInput())})
   ### This will create the dynamic dropdown list ###
-  
-  
   
   output$selected_input_x_col <- renderUI({
     selectInput('xcol', 'X Variable', names(datasetInput()))
@@ -219,14 +228,10 @@ server <- function(input, output) {
     head(datasetInput())
   })
   
-  
   # Show the first "n" observations
   output$strucutre <- renderPrint({
     str(datasetInput())
   })
-  
-  
-  
   
   rownames(data) = raw[,1]
   
@@ -238,7 +243,6 @@ server <- function(input, output) {
   output$pca_variance_plot <- renderPlot({
   
   # read local, online or default dataset
-  data <- datasetInput()
   
   #Computing PCA
   scaled_data = as.matrix(scale(data))
@@ -266,7 +270,7 @@ server <- function(input, output) {
   #by each principal component / total variance explained by all four principal components)
   pve=data.prc_var/sum(data.prc_var)
   pve
-  plot(pve,xlab="Principal Component",ylab="Proportion of Variance Explained",ylim=c(0,1),type='b')
+  #plot(pve,xlab="Principal Component",ylab="Proportion of Variance Explained",ylim=c(0,1),type='b')
   pca_variance_plot <- plot(cumsum(pve),xlab="PrincipalComponent",ylab="Cumulative Proportion of Variance
 Explained",ylim=c(0,1),type='b')
   })
@@ -274,8 +278,6 @@ Explained",ylim=c(0,1),type='b')
   #Biplot
   output$pcaplot <- renderPlot({
     biplot(data.prc, scale=0)})
-    
-  
   
   # Create a tsna plot of the dataset
   output$tsne_plot <- renderPlot({
@@ -335,7 +337,6 @@ Explained",ylim=c(0,1),type='b')
   # Typically viewed with a grayscale palette, areas of low neighbour distance indicate groups of nodes that are similar. 
   # Areas with large distances indicate the nodes are much more dissimilar - and indicate natural boundaries between node 
   # clusters. The U-Matrix can be used to identify clusters within the SOM map. 
-  
   plot(som_model, type = "property", property = getCodes(som_model, 1)[,2]) # ??? Make a loop over all the variables ?
   
   
@@ -346,7 +347,6 @@ Explained",ylim=c(0,1),type='b')
   # visualisation of the weight vectors is a "fan diagram", where individual fan representations of the magnitude of each 
   # variable in the weight vector is shown for each node. Other represenations are available, see the kohonen plot 
   # documentation for details. 
-  
   plot(som_model, type="codes")
   
   ##### SOM Heatmap #####
@@ -354,7 +354,6 @@ Explained",ylim=c(0,1),type='b')
   # process involves the creation of multiple heatmaps, and then the comparison of these heatmaps to identify interesting areas on 
   # the map. It is important to remember that the individual sample positions do not move from one visualisation to another, the 
   # map is simply coloured by different variables.
-  
   plot(som_model, type = "property", property = getCodes(som_model), main=names(som_model$data))
   
   ##### Clustering #####
