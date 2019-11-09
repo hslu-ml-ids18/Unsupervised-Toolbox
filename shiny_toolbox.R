@@ -10,6 +10,7 @@
 # Explain somewhere whats happening and what the tool is doing!!
 
 library(shiny)
+library(kohonen)
 # Generate data as 3 separated groups
 x1 <- 80+rnorm(20, mean=20, sd=10)
 y1 <- 80+rnorm(20, mean=20, sd=10)
@@ -110,7 +111,7 @@ ui <- fluidPage(
                   tabPanel("PCA", plotOutput("pcaplot", width = "1200px"), plotOutput("pca_variance_plot", width = "1200px")),
                   tabPanel("t-SNE", value=3 , plotOutput("tsne_plot", height = "800px")),
                   tabPanel("K-means", value=4, plotOutput("k_cluster"), plotOutput("k_cluster_total") ),
-                  tabPanel("Absolutely-positioned panel", plotOutput("heatmap", height = "800px", width = "1200px")),
+                  tabPanel("Absolutely-positioned panel", plotOutput("heatmap", height = "800px", width = "auto")),
                   tabPanel("SOM", plotOutput("som")),
                   tabPanel("Tree", plotOutput("tree"))
       )
@@ -163,7 +164,7 @@ server <- function(input, output) {
   
   output$k_cluster <- renderPlot({
     
-    # read local, online or defautl dataset
+    # read local, online or default dataset
     data <- datasetInput()
     
     # Data prep, only numeric
@@ -236,6 +237,8 @@ server <- function(input, output) {
   
   output$pca_variance_plot <- renderPlot({
   
+  # read local, online or default dataset
+  data <- datasetInput()
   #Computing PCA
   scaled_data = as.matrix(scale(data))
   data.prc <- prcomp(scaled_data)
