@@ -84,6 +84,7 @@ ui <- fluidPage(
                    c("Default" = "default",
                      "Local" = "local",
                      "Online" = "online")),
+      textInput("separator", "Choose a separator for your file", ","),
       
         tags$hr()),
       conditionalPanel(condition = "input.tabs==4",
@@ -126,8 +127,8 @@ server <- function(input, output) {
   # Return the requested dataset ----
   datasetInput <- reactive({
     switch(input$dataset,
-           local = read.csv(file=input$file_local$datapath, header=TRUE, sep=","),
-           online = read.csv(url(input$file_online), header=TRUE, sep=","),
+           local = read.csv(file=input$file_local$datapath, header=TRUE, sep= input$separator),
+           online = read.csv(url(input$file_online), header=TRUE, sep= input$separator),
            data_def)
   })
   
@@ -234,11 +235,11 @@ server <- function(input, output) {
   apply(data,2,var)
   
   ### Principal Component Analysis
-  
   output$pca_variance_plot <- renderPlot({
   
   # read local, online or default dataset
   data <- datasetInput()
+  
   #Computing PCA
   scaled_data = as.matrix(scale(data))
   data.prc <- prcomp(scaled_data)
@@ -248,15 +249,13 @@ server <- function(input, output) {
   data.prc$center
   data.prc$scale
   
-  
   # Rotation matrix provides the principal component of the loadings.
   dim(data.prc$rotation)
   data.prc$rotation
-  # x matrix provides the principal component of the scores.
+ 
+   # x matrix provides the principal component of the scores.
   dim(data.prc$x)
   data.prc$x
-  
-
   
   #Get standard deviation and variance of PCA
   data.prc$sdev
@@ -280,9 +279,11 @@ Explained",ylim=c(0,1),type='b')
   
   # Create a tsna plot of the dataset
   output$tsne_plot <- renderPlot({
+    
     # Define a function to run tsna with input variables
     ###t-Distributed Stochastic Neighbor Embedding (tSNE)
     library(Rtsne)
+    
     # Use table row names to label the datapoint later in the plot:
     data_label<-as.factor(rownames(data))
     
@@ -298,11 +299,13 @@ Explained",ylim=c(0,1),type='b')
     text(tsne$Y, labels=data_label) })
   
   output$som <- renderPlot({
-  # For plotting evaluation against colorcode # category (~ classification solution) 
+  
+    # For plotting evaluation against colorcode # category (~ classification solution) 
   row_label <- as.factor(rownames(data)) 
   colors <- c("red", "black", "blue")
   colors <- colors[as.numeric(data$Item)]
   data_train_matrix <- as.matrix(scale(data))
+  
   ##### Define the neuronal grid #####
   som_grid <- somgrid(xdim = 4, ydim = 4, topo="hexagonal")
   
