@@ -11,6 +11,7 @@
 
 library(shiny)
 library(kohonen)
+library(ggplot2)
 # Generate data as 3 separated groups
 x1 <- 80+rnorm(20, mean=20, sd=10)
 y1 <- 80+rnorm(20, mean=20, sd=10)
@@ -106,14 +107,20 @@ ui <- fluidPage(
                     "Number of clusters:",
                     min = 1,
                     max = 20,
-                    value = 3),
-        
+                    value = 3)),
+      conditionalPanel(condition = "input.tabs==6",
         sliderInput("tree_h",
                     "Height of tree:",
                     min = 1,
                     max = 20,
+                    value = 3),
+        sliderInput("tree_k",
+                    "Cut of tree:",
+                    min = 1,
+                    max = 20,
                     value = 3)
-                )),
+                    )
+    ),
     
      # Show a plot of the generated distribution
     mainPanel(
@@ -125,7 +132,7 @@ ui <- fluidPage(
                   tabPanel("K-means", value=4, plotOutput("k_cluster"), plotOutput("k_cluster_total") ),
                   tabPanel("Absolutely-positioned panel", plotOutput("heatmap", height = "800px", width = "auto")),
                   tabPanel("SOM", plotOutput("som")),
-                  tabPanel("Tree", plotOutput("tree"))
+                  tabPanel("Tree", value=6, plotOutput("tree"))
       )
       
     )
@@ -167,7 +174,7 @@ server <- function(input, output) {
   output$tree <- renderPlot({
     data_scaled <- as.matrix(scale(datasetInput()))
     hc1= hclust(dist(data_scaled))
-    cutree(hc1, k = 3)
+    cutree(hc1, k = input$tree_k, h = input$tree_h)
     plot(hc1)
     
   })
@@ -297,8 +304,18 @@ Explained",ylim=c(0,1),type='b')
     tsne <- Rtsne(tSNEdata, dims = 2,
                   perplexity= input$Perplexity, verbose=TRUE,
                   max_iter = input$Iteration)
-    plot(tsne$Y)
-    text(tsne$Y, labels=data_label) })
+    tsneplot <- plot(tsne$Y, type = "p")
+    # text(tsne$Y, labels=data_label)
+    
+    # df <- data.frame(x = tsne$Y[,1],
+    #                  y = tsne$Y[,2])
+    # 
+    # ggplot(df, aes(x, y)) +
+    #   geom_point()
+    # 
+    
+    
+    })
   
   output$som <- renderPlot({
   
