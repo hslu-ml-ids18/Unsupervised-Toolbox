@@ -12,19 +12,27 @@
 library(shiny)
 library(kohonen)
 library(ggplot2)
+# Define a function to run tsna with input variables
+###t-Distributed Stochastic Neighbor Embedding (tSNE)
+library(Rtsne)
+
 # Generate data as 3 separated groups
 x1 <- 80+rnorm(20, mean=20, sd=10)
 y1 <- 80+rnorm(20, mean=20, sd=10)
+z1 <- 85+rnorm(20, mean=25, sd=20) 
 x2 <- 80+rnorm(20, mean=70, sd=10)
 y2 <- 80+rnorm(20, mean=20, sd=10)
+z2 <- 60+rnorm(20, mean=55, sd=15)
 x3 <- 80+rnorm(20, mean=40, sd=10)
 y3 <- 80+rnorm(20, mean=120, sd=10)
+z3 <- 70+rnorm(20, mean=75, sd=5)
 
 # Merge them all in a single dataset
 x <- c(x1,x2,x3)
 y <- c(y1,y2,y3)
+z <- c(z1,z2,z3)
 i <- seq(1, length(y))
-data_def <- data.frame(i,x,y)
+data_def <- data.frame(x,y,z)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -132,7 +140,7 @@ ui <- fluidPage(
                   tabPanel("K-means", value=4, plotOutput("k_cluster"), plotOutput("k_cluster_total") ),
                   tabPanel("Absolutely-positioned panel", plotOutput("heatmap", height = "800px", width = "auto")),
                   tabPanel("SOM", plotOutput("som")),
-                  tabPanel("Tree", value=6, plotOutput("tree"))
+                  tabPanel("Tree", value=6, plotOutput("tree"), verbatimTextOutput("tree_cut"))
       )
       
     )
@@ -165,18 +173,44 @@ server <- function(input, output) {
   })
   
   output$heatmap <- renderPlot({
-    data_scaled <- as.matrix(scale(datasetInput()))
+    
+    data <- datasetInput()
+    
+    # Data prep, only numeric
+    data <- data[ , purrr::map_lgl(data, is.numeric)]
+    
+    data_scaled <- as.matrix(scale(data))
     heatmap(data_scaled,
             col = topo.colors(200, alpha=0.5),
             Colv=F, scale="none")
   })
   
   output$tree <- renderPlot({
-    data_scaled <- as.matrix(scale(datasetInput()))
+    
+    data <- datasetInput()
+    
+    # Data prep, only numeric
+    data <- data[ , purrr::map_lgl(data, is.numeric)]
+    
+    data_scaled <- scale(data)
     hc1= hclust(dist(data_scaled))
-    cutree(hc1, k = input$tree_k, h = input$tree_h)
+  
     plot(hc1)
     
+  })
+  
+  # Generate a summary of the dataset
+  output$tree_cut <- renderText({
+    
+    data <- datasetInput()
+    
+    # Data prep, only numeric
+    data <- data[ , purrr::map_lgl(data, is.numeric)]
+    
+    data_scaled <- scale(data)
+    hc1= hclust(dist(data_scaled))
+    
+    cutree(hc1, k = input$tree_k, h = input$tree_h)
   })
   
   output$k_cluster <- renderPlot({
@@ -203,6 +237,8 @@ server <- function(input, output) {
   output$k_cluster_total <- renderPlot({    
     #read dataset
     data <- datasetInput()
+    # Data prep, only numeric
+    data <- data[ , purrr::map_lgl(data, is.numeric)]
     
     # Run Total within-cluster sum of squares Plot
     List_y <- list()
@@ -240,16 +276,20 @@ server <- function(input, output) {
     str(datasetInput())
   })
   
-  rownames(data) = raw[,1]
-  
-  # Get mean and variance in every column of the dataset
-  apply(data,2,mean)
-  apply(data,2,var)
+
   
   ### Principal Component Analysis
   output$pca_variance_plot <- renderPlot({
   
-  # read local, online or default dataset
+    # read local, online or default dataset
+    data <- datasetInput()
+    
+    rownames(data) = raw[,1]
+    
+    # Get mean and variance in every column of the dataset
+    apply(data,2,mean)
+    apply(data,2,var)
+    
   
   #Computing PCA
   scaled_data = as.matrix(scale(data))
@@ -289,9 +329,11 @@ Explained",ylim=c(0,1),type='b')
   # Create a tsna plot of the dataset
   output$tsne_plot <- renderPlot({
     
-    # Define a function to run tsna with input variables
-    ###t-Distributed Stochastic Neighbor Embedding (tSNE)
-    library(Rtsne)
+    # read local, online or default dataset
+    data <- datasetInput()
+    
+    # Data prep, only numeric
+    data <- data[ , purrr::map_lgl(data, is.numeric)]
     
     # Use table row names to label the datapoint later in the plot:
     data_label<-as.factor(rownames(data))
@@ -318,7 +360,12 @@ Explained",ylim=c(0,1),type='b')
     })
   
   output$som <- renderPlot({
+    # read local, online or default dataset
+    data <- datasetInput()
   
+    # Data prep, only numeric
+    data <- data[ , purrr::map_lgl(data, is.numeric)]
+      
     # For plotting evaluation against colorcode # category (~ classification solution) 
   row_label <- as.factor(rownames(data)) 
   colors <- c("red", "black", "blue")
