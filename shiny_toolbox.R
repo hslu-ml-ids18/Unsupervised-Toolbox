@@ -135,12 +135,12 @@ ui <- fluidPage(
       # Output: Tabset w/ plot, summary, and table ----
       tabsetPanel(type = "tabs", id = "tabs",
                   tabPanel("DataSet", value=1, br(), verbatimTextOutput("summary"), verbatimTextOutput("strucutre"), tableOutput("view")),
-                  tabPanel("PCA", plotOutput("pcaplot", width = "1200px"), plotOutput("pca_variance_plot", width = "1200px")),
-                  tabPanel("t-SNE", value=3 , plotOutput("tsne_plot", height = "800px")),
-                  tabPanel("K-means", value=4, plotOutput("k_cluster"), plotOutput("k_cluster_total") ),
-                  tabPanel("Absolutely-positioned panel", plotOutput("heatmap", height = "800px", width = "auto")),
-                  tabPanel("SOM", plotOutput("som")),
-                  tabPanel("Tree", value=6, plotOutput("tree"), verbatimTextOutput("tree_cut"))
+                  tabPanel("PCA", plotOutput("pcaplot"), plotOutput("pca_variance_plot")),
+                  tabPanel("t-SNE", value=3 , plotOutput("tsne_plot")),
+                  tabPanel("K-Means", value=4, plotOutput("k_cluster"), plotOutput("k_cluster_total") ),
+                  tabPanel("HC-Heatmap", plotOutput("heatmap")),
+                  tabPanel("HC-SOM", plotOutput("som"), plotOutput("som_cluster")),
+                  tabPanel("HC-Tree", value=6, plotOutput("tree"), verbatimTextOutput("tree_cut"))
       )
       
     )
@@ -161,7 +161,7 @@ server <- function(input, output) {
   selectedData <- reactive({
     datasetInput()[, c(input$xcol, input$ycol)]
   })
-  
+
   #output$selected_input_xclol <- renderText({names(datasetInput())})
   ### This will create the dynamic dropdown list ###
   
@@ -276,55 +276,61 @@ server <- function(input, output) {
     str(datasetInput())
   })
   
-
-  
   ### Principal Component Analysis
   output$pca_variance_plot <- renderPlot({
   
-    # read local, online or default dataset
+  # read local, online or default dataset
     data <- datasetInput()
     
-    rownames(data) = raw[,1]
-    
-    # Get mean and variance in every column of the dataset
+    # apply() function allows to apply a function, mean()/var(), to each row (1) or column (2) of the data set
     apply(data,2,mean)
     apply(data,2,var)
     
-  
-  #Computing PCA
-  scaled_data = as.matrix(scale(data))
-  data.prc <- prcomp(scaled_data)
-  names(data.prc)
-  
-  #Standard deviation and means of the variables that were used for scaling prior to implementing PCA:
-  data.prc$center
-  data.prc$scale
-  
-  # Rotation matrix provides the principal component of the loadings.
-  dim(data.prc$rotation)
-  data.prc$rotation
- 
-   # x matrix provides the principal component of the scores.
-  dim(data.prc$x)
-  data.prc$x
-  
-  #Get standard deviation and variance of PCA
-  data.prc$sdev
-  data.prc_var = data.prc$sdev^2
-  data.prc_var
-  
-  # In order to compute the proportion of variance explained by each principal component (variance explained 
-  #by each principal component / total variance explained by all four principal components)
-  pve=data.prc_var/sum(data.prc_var)
-  pve
-  #plot(pve,xlab="Principal Component",ylab="Proportion of Variance Explained",ylim=c(0,1),type='b')
-  pca_variance_plot <- plot(cumsum(pve),xlab="PrincipalComponent",ylab="Cumulative Proportion of Variance
+    # Compute PCA.
+    # scale=TRUE to scale the variables to have standard deviation = 1 pr.out=prcomp(USArrests,scale=TRUE)
+    pr.out=prcomp(USArrests,scale=TRUE)
+    
+    # scale=TRUE to scale the variables to have standard deviation = 1 pr.out=prcomp(USArrests,scale=TRUE)
+    names(pr.out)
+    
+    # Access all stuff computed by PCA.
+    # Means and standard deviations of the variables that were used for scaling prior to implementing PCA. pr.out$center
+    pr.out$scale
+    # Rotation matrix provides the principal component of the loadings.
+    dim(pr.out$rotation)
+    pr.out$rotation
+    # x matrix provides the principal component of the scores. dim(pr.out$x)
+    pr.out$x
+    # Biplot, scale=0 ensures that the arrows are scaled to represent the loadings; other values for scale give slightly different biplots with different interpretations.
+    biplot(pr.out,scale=0) 
+    
+    # This is to make the figure look like in the book, mirrored, for some reason, it does not change the significance.
+    pr.out$rotation=-pr.out$rotation
+    pr.out$x=-pr.out$x
+    biplot(pr.out,scale=0)
+    # From PCA, get the standard deviation, and variance.
+    pr.out$sdev
+    pr.var=pr.out$sdev^2
+    #pr.var
+    # In order to compute the proportion of variance explained by each principal component (variance explained by each principal component / total variance explained by all four principal components) 
+    pve=pr.var/sum(pr.var)
+    #pve
+    plot(pve,xlab="Principal Component",ylab="Proportion of Variance Explained",ylim=c(0,1),type='b')
+    plot(cumsum(pve),xlab="PrincipalComponent",ylab="Cumulative Proportion of Variance
 Explained",ylim=c(0,1),type='b')
   })
   
   #Biplot
   output$pcaplot <- renderPlot({
-    biplot(data.prc, scale=0)})
+    
+    # read local, online or default dataset
+    data <- datasetInput()
+
+    scaled_data <- scale(data)
+    data.prc <- prcomp(scaled_data)
+    biplot(data.prc, scale=0)
+    
+    })
   
   # Create a tsna plot of the dataset
   output$tsne_plot <- renderPlot({
@@ -429,17 +435,46 @@ Explained",ylim=c(0,1),type='b')
   tree <- as.dendrogram(hclust(dist(as.numeric(unlist(som_model$codes))))) 
   plot(tree, ylab = "Height (h)")
   
-  ## use hierarchical clustering to cluster the codebook vectors
-  som_cluster <- cutree(hclust(dist(as.numeric(unlist(som_model$codes)))), h=2)
-  # plot these results:
-  pretty_palette <- c("#1f77b4", '#ff7f0e', '#2ca02c', '#d62728', 
-                      '#9467bd', '#8c564b', '#e377c2')
+
+  })
+  
+  
+  output$som_cluster <- renderPlot({
+    
+    # read local, online or default dataset
+    data <- datasetInput()
+    
+    # Data prep, only numeric
+    data <- data[ , purrr::map_lgl(data, is.numeric)]
+    
+    # For plotting evaluation against colorcode # category (~ classification solution) 
+    row_label <- as.factor(rownames(data)) 
+    colors <- c("red", "black", "blue")
+    colors <- colors[as.numeric(data$Item)]
+    data_train_matrix <- as.matrix(scale(data))
+    
+    ##### Define the neuronal grid #####
+    som_grid <- somgrid(xdim = 4, ydim = 4, topo="hexagonal")
+    
+    ##### Train the model #####
+    som_model <- som(data_train_matrix, grid=som_grid, rlen=1000, alpha=c(0.05,0.01), keep.data=TRUE)
+    
+    #dsdfjlksdjfjkldjl
+    row_label <- as.factor(rownames(data)) 
+    
+    ## use hierarchical clustering to cluster the codebook vectors
+    som_cluster <- cutree(hclust(dist(as.numeric(unlist(som_model$codes)))), h=2)
+    # plot these results:
+    pretty_palette <- c("#1f77b4", '#ff7f0e', '#2ca02c', '#d62728', 
+                        '#9467bd', '#8c564b', '#e377c2')
+    
+    
   plot(som_model, type="mapping",labels = (rownames(data)),
        bgcol=pretty_palette[som_cluster], col=colors[row_label])
   add.cluster.boundaries(som_model,som_cluster)
   
+
   })
-  
   
 }
 
