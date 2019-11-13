@@ -7,13 +7,12 @@
 #    http://shiny.rstudio.com/
 #
 
-# Explain somewhere whats happening and what the tool is doing!!
+# Prep work ==================================================================
 
+# Load the required packages
 library(shiny)
 library(kohonen)
 library(ggplot2)
-# Define a function to run tsna with input variables
-###t-Distributed Stochastic Neighbor Embedding (tSNE)
 library(Rtsne)
 
 # Generate data as 3 separated groups
@@ -55,12 +54,12 @@ ui <- fluidPage(
                     
                     "))
     ),
-  # Application title
+  # Format the application title
   h1("Machine Learning 2 - Unsupervised Toolbox"),
   "by",
   strong("Giuliano Ardesi, Lisa Becker, Anastasiia Chebatarova, Axel Kandel, Alexander Kusche"),
   
-  # Sidebar with a slider input for number of bins 
+  # Create sidebar with a slider input for number of bins 
   sidebarLayout(
     sidebarPanel(
       conditionalPanel(condition = "input.tabs==3",
@@ -162,8 +161,8 @@ server <- function(input, output) {
     datasetInput()[, c(input$xcol, input$ycol)]
   })
   
-  #output$selected_input_xclol <- renderText({names(datasetInput())})
-  ### This will create the dynamic dropdown list ###
+  
+  ### Create a dynamic dropdown list ###
   
   output$selected_input_x_col <- renderUI({
     selectInput('xcol', 'X Variable', names(datasetInput()))
@@ -176,7 +175,7 @@ server <- function(input, output) {
     
     data <- datasetInput()
     
-    # Data prep, only numeric
+    # Keep only the numerical data
     data <- data[ , purrr::map_lgl(data, is.numeric)]
     
     data_scaled <- as.matrix(scale(data))
@@ -189,7 +188,7 @@ server <- function(input, output) {
     
     data <- datasetInput()
     
-    # Data prep, only numeric
+    # Keep only the numerical data
     data <- data[ , purrr::map_lgl(data, is.numeric)]
     
     data_scaled <- scale(data)
@@ -204,7 +203,7 @@ server <- function(input, output) {
     
     data <- datasetInput()
     
-    # Data prep, only numeric
+    # Keep only the numerical data
     data <- data[ , purrr::map_lgl(data, is.numeric)]
     
     data_scaled <- scale(data)
@@ -215,16 +214,16 @@ server <- function(input, output) {
   
   output$k_cluster <- renderPlot({
     
-    # read local, online or default dataset
+    # Read local, online or default dataset
     data <- datasetInput()
     
-    # Data prep, only numeric
+    # Keep only the numerical data
     data <- data[ , purrr::map_lgl(data, is.numeric)]
     
-    # Choose column 2 and 3, skipping column 1, assuming its an index.
+    # Choose column 2 and 3, skipping column 1 (assuming its an index)
     data <- selectedData()
     
-    # Run K-means Plot
+    # Run K-means plot
     km.out <- kmeans(data,input$k,nstart =50)
     plot (data, col =(km.out$cluster+1),
           main ="K-Means Clustering" ,
@@ -235,12 +234,14 @@ server <- function(input, output) {
   })
   
   output$k_cluster_total <- renderPlot({    
+    
     #read dataset
     data <- datasetInput()
-    # Data prep, only numeric
+    
+    # Keep only the numerical data
     data <- data[ , purrr::map_lgl(data, is.numeric)]
     
-    # Run Total within-cluster sum of squares Plot
+    # Run total within-cluster sum of squares plot
     List_y <- list()
     List_x <- list()
     for (k in seq(1,input$k)){
@@ -260,13 +261,8 @@ server <- function(input, output) {
     summary(data)
   })
   
-  # Show the first "n" observations
-  #output$view <- renderTable({
-  #  input$show_all = "head"
-  #})
-  #  head(datasetInput())
   
-  # Return the requested dataset ----
+  # Return the requested dataset 
   output$view <- renderTable({
     head(datasetInput())
   })
@@ -278,10 +274,10 @@ server <- function(input, output) {
   
 
   
-  ### Principal Component Analysis
+#Principal Component Analysis =============================================================
   output$pca_variance_plot <- renderPlot({
   
-    # read local, online or default dataset
+    # Read local, online or default dataset
     data <- datasetInput()
     
     rownames(data) = raw[,1]
@@ -291,7 +287,7 @@ server <- function(input, output) {
     apply(data,2,var)
     
   
-  #Computing PCA
+  # Computing PCA
   scaled_data = as.matrix(scale(data))
   data.prc <- prcomp(scaled_data)
   names(data.prc)
@@ -308,16 +304,14 @@ server <- function(input, output) {
   dim(data.prc$x)
   data.prc$x
   
-  #Get standard deviation and variance of PCA
+  # Get standard deviation and variance of PCA
   data.prc$sdev
   data.prc_var = data.prc$sdev^2
   data.prc_var
   
-  # In order to compute the proportion of variance explained by each principal component (variance explained 
-  #by each principal component / total variance explained by all four principal components)
+  # In order to compute the proportion of variance explained by each principal component (variance explained by each principal component / total variance explained by all four principal components)
   pve=data.prc_var/sum(data.prc_var)
-  pve
-  #plot(pve,xlab="Principal Component",ylab="Proportion of Variance Explained",ylim=c(0,1),type='b')
+  
   pca_variance_plot <- plot(cumsum(pve),xlab="PrincipalComponent",ylab="Cumulative Proportion of Variance
 Explained",ylim=c(0,1),type='b')
   })
@@ -329,41 +323,32 @@ Explained",ylim=c(0,1),type='b')
   # Create a tsna plot of the dataset
   output$tsne_plot <- renderPlot({
     
-    # read local, online or default dataset
+    # Read local, online or default dataset
     data <- datasetInput()
     
-    # Data prep, only numeric
+    # Keep only the numerical data
     data <- data[ , purrr::map_lgl(data, is.numeric)]
     
-    # Use table row names to label the datapoint later in the plot:
+    # Use table row names to label the datapoint later in the plot
     data_label<-as.factor(rownames(data))
     
-    #remove duplicates:
+    # r^Remove duplicates
     data_unique <- unique(data)
     
-    #  Run tSNE:
+    #  Run tSNE
     tSNEdata <- as.matrix(scale(data_unique))
     tsne <- Rtsne(tSNEdata, dims = 2,
                   perplexity= input$Perplexity, verbose=TRUE,
                   max_iter = input$Iteration)
     tsneplot <- plot(tsne$Y, type = "p")
-    # text(tsne$Y, labels=data_label)
-    
-    # df <- data.frame(x = tsne$Y[,1],
-    #                  y = tsne$Y[,2])
-    # 
-    # ggplot(df, aes(x, y)) +
-    #   geom_point()
-    # 
-    
-    
     })
   
   output$som <- renderPlot({
-    # read local, online or default dataset
+    
+    # Read local, online or default dataset
     data <- datasetInput()
   
-    # Data prep, only numeric
+    # Keep only the numerical data
     data <- data[ , purrr::map_lgl(data, is.numeric)]
       
     # For plotting evaluation against colorcode # category (~ classification solution) 
