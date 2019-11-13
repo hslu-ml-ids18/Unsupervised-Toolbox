@@ -261,7 +261,7 @@ ui <- fluidPage(
 
     # Show a plot of the generated distribution
     mainPanel(
-      # Output: Tabset w/ plot, summary, and table ----
+      # Output: Tabset w/ plot, summary, and table
       tabsetPanel(type = "tabs", id = "tabs",
                   tabPanel("DataSet", value=1, br(), verbatimTextOutput("summary"), verbatimTextOutput("strucutre"), tableOutput("view")),
                   tabPanel("PCA", plotOutput("pcaplot"), value=2, plotOutput("pca_variance_plot")),
@@ -331,6 +331,7 @@ server <- function(input, output) {
     )
   })
 
+# Tree (Hirarchical Clustering) ==================================================================  
   output$tree <- renderPlot({
 
     data <- datasetInput()
@@ -483,7 +484,8 @@ Explained",ylim=c(0,1),type='b')
 
     })
 
-  # Create a tsna plot of the dataset
+# T-distributed stochastic nearest neighbor ==================================================================
+  # Create a tsne plot of the dataset
   output$tsne_plot <- renderPlot({
 
 
