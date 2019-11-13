@@ -1,16 +1,157 @@
-# Toolbox to 
+**********************************
+#  UNSUPERVISED LEARNING TOOLBOX
+**********************************
 
-# Chose dataset
+**********************************
+#  0. Table of contents
+**********************************
 
-The toolbox enables the user to choose between three different data sources. 
-	1) User can use his own dataset, by uploading from local 
-	2) User can specific an online resource, by submitting the url
-	3) User can use a generated dataset
+	1. Introduction
+	2. Choose a dataset
+	3. Apply methods
+	 3.1 K-Means Clustering
+	 3.2 Hierarchical Clustering (HC)
+	 3.3 Principal Component Analysis (PCA)
+	 3.4 t-Distributed Stochastic Neighbor Embedding (tSNE))
+	 3.5 Self-Organizing Maps (SOMs)
+	
+**********************************
+#      1. Introduction
+**********************************
 
-# Apply algorithm 
+Thank you very much for using our machine learning toolbox.
+This Toolbox has been created as part of our course "Applied Machine Learning and Predictive Modelling 2" at the Lucerne University of Applied Sciences and Arts.
+The focus of this toolbox is to aid you with your unsupervised learning tasks.
 
-By selecting a tab the user can choose between different machine learning algorithm to be applied on the data.
 
-# The result 
+**********************************
+#     2. Choose a dataset
+**********************************
+The toolbox comes preloaded with a dummy dataset. To load your own data you can: 
 
-The results are shown, for each tab. The user can change parameters by using slider.
+	1) Upload your locally stored file via the browse function. Be sure to check the radio button labelled "Local".
+	2) Specify an online resource by submitting the URL. Be sure to check the radio button labelled "Online".
+
+The "DataSet" tab gives you an overview of the data included in the loaded set.
+Please be aware that this toolbox cannot handle categorical data. To use it, be sure that your data only consists of numerical values.
+
+**********************************
+#      3. Apply algorithms
+**********************************
+
+The different tabs help you applying different algorithms to your data. This toolbox offers you these algorithms:
+
+	- K-Means Clustering
+	- Hierarchical Clustering (HC) using dendrograms and heatmaps
+	- Principal Component Analysis (PCA)
+	- t-Distributed Stochastic Neighbor Embedding (tSNE)
+	- Self-Organizing Maps (SOMs)
+
+Each tab generates a plot as output. By using the sliders on the left hand side you can change the parameters.
+
+	**********************************
+	# 3.1 K-Means Clustering
+	**********************************
+	
+	What it is:
+		- Unsupervised, parametric method (need to pre-specify K number of clusters)
+
+	When to use it:
+		- First exploration of multidimensional data (few assumptions needed, i.e., K).
+
+	What it does:
+		- Groups data based on their similarity, the resulting clusters have similar properties
+		- Push the data into K pre-determined categories (can be an advantage in certain situations)
+	How it does this:
+		- Choose a number K of cluster centers
+		- Place the centers randomly in the data space (initial cluster assignment)
+		- Iteratively move the centers to minimize the total within cluster variance (data-center distance)
+
+	**********************************
+	# 3.2 Hierarchical Clustering (HC)
+	**********************************
+	
+	What it is:
+		- Unsupervised, non-parametric method (no need labelled data)
+		- “Better” than K-means clustering, no need to specify K number of clusters a priori (goes through all K’s)
+
+	When to use it:
+		- First exploration of multidimensional data (no assumptions needed). “Data driven”!
+
+	What it does:
+		- Groups data based on their similarity, the resulting clusters have similar properties
+
+	How it does this:
+		- Bottom-up agglomerative clustering
+		- Can use different metric (Euclidean-, Pearson distance)
+		- Generates dendrograms that highlight similar patterns in the data set
+		- Often combined to heatmaps graphical representation
+		
+	**********************************
+	# 3.3 Principal Component Analysis 
+				 (PCA)
+	**********************************
+
+	What it is:
+		- Unsupervised, linear, non-parametric method
+
+	When to use it:
+		- First exploration of multidimensional data (no assumptions needed). “Data driven”!
+	
+	What it does:
+	- PCA reduces the dimensionality of a dataset → more understandable representation
+	
+	How it does this:
+	- Find new axes (principal components) that represent the data space in a reduced set of
+	  dimensions → capture the most important information in the data
+	- Capture the maximal variance of the data
+	- Highlight the global patterns in the data set
+
+	=> Data organization method for grouping variables with similar behaviour
+
+	**********************************
+	# 3.4 t-Distributed Stochastic 
+		  Neighbor Embedding (tSNE))
+	**********************************
+	
+	What it is:
+	- Unsupervised, non-linear, parametric method for dimensionality reduction
+
+	When to use it:
+	- Exploration & visualization of data, well-suited for high-dimensional data
+
+	What it does:
+	- “Embeds high-dimensional data in a low-dimensional space to visualize”
+	- tSNE minimizes the difference between the similarity of points in high & in low-dimensional space
+	  (according to a conditional probability ruled by a probability distribution)
+
+	How it does this:
+	- Minimize distributions divergence (Kullback-Leibler divergence, relative entropy) between
+		– a similarity distribution of multi-dimensional input objects and
+		– a similarity distribution of the corresponding low-dimensional points
+		– using a gradient descent 
+	
+	=> Data organization method for grouping variables with similar behaviour (as in PCA, HC, K-means)
+	
+	**********************************
+	# 3.5 Self-Organizing Maps (SOMs)
+	**********************************
+
+	What it is:
+	- Unsupervised, nonlinear, parametric method
+	- Type of artificial neural network
+	- Somewhat similar to K-means (SOMs with a small number of nodes behave similar to K-means)
+	- Somewhat similar to PCA (can be considered a nonlinear generalization of PCA)
+
+	When to use it:
+	- For data visualization of high-dimensional data
+
+	What it does:
+	- Reduces the dimensionality of a dataset → similar to PCA, tSNE
+	- Trains a neural network such that parts of it become specifically responsive to certain input patterns
+	- Produces a low-dimensional, discrete representation (= map) of the input space of the training samples
+	- Mapping from a higher-dimensional input space to a lower-dimensional map space
+	
+	How it does this:
+	- Uses competitive learning (unlike other artificial neural networks, that use error correction learning like backpropagation & gradient descent)
+	- Trained SOMs classify inputs by finding the node with the closest distance (smallest metric) to the input
