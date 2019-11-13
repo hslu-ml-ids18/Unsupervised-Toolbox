@@ -263,13 +263,13 @@ ui <- fluidPage(
     mainPanel(
       # Output: Tabset w/ plot, summary, and table ----
       tabsetPanel(type = "tabs", id = "tabs",
-                  tabPanel("DataSet", value=1, br(), verbatimTextOutput("summary"), verbatimTextOutput("strucutre"), tableOutput("view")),
+                  tabPanel("DataSet", value=1, br(), verbatimTextOutput("summary"), verbatimTextOutput("strucutre"), verbatimTextOutput("view_table"), tableOutput("view")),
                   tabPanel("PCA", plotOutput("pcaplot"), value=2, plotOutput("pca_variance_plot")),
                   tabPanel("t-SNE", value=3 , plotOutput("tsne_plot")),
                   tabPanel("K-Means", value=4, plotOutput("k_cluster"), plotOutput("k_cluster_total") ),
                   tabPanel("HC-Heatmap", value=5, plotOutput("heatmap")),
                   tabPanel("HC-SOM", value = 6, plotOutput("som"), plotOutput("som_cluster")),
-                  tabPanel("HC-Tree", value=7, plotOutput("tree"), verbatimTextOutput("tree_cut"))
+                  tabPanel("HC-Tree", value=7, plotOutput("tree"), br(), verbatimTextOutput("tree_cut"))
       )
 
     )
@@ -326,7 +326,8 @@ server <- function(input, output) {
       data_scaled,
       col = topo.colors(200, alpha = 0.5),
       Colv = F,
-      scale = "none"
+      scale = "none",
+      main = "Heatmap"
     )
   })
 
@@ -402,13 +403,15 @@ server <- function(input, output) {
          List_y,
          typ = "b",
          xlab = "Number of Clusters",
-         ylab = "Total within-cluster sum of squares")
+         ylab = "Total within-cluster sum of squares",
+         main = "Number of Clusters vs. Total within-cluster sum of squares")
 
   })
 
   # Generate a summary of the dataset
   output$summary <- renderPrint({
     data <- datasetInput()
+    print("Summary of dataset")
     summary(data)
     
   })
@@ -420,9 +423,14 @@ server <- function(input, output) {
 
   # Show the first "n" observations
   output$strucutre <- renderPrint({
+    print("Strucutre of dataset")
     str(datasetInput())
   })
   
+  # Show the first "n" observations
+  output$view_table <- renderPrint({
+    print("Data as Table")
+  })
   
   
 #Principal Component Analysis (PCA) =============================================================
@@ -466,8 +474,8 @@ server <- function(input, output) {
     #pve
     plot(pve,xlab="Principal Component",ylab="Proportion of Variance Explained",ylim=c(0,1),type='b')
     plot(cumsum(pve),xlab="PrincipalComponent",ylab="Cumulative Proportion of Variance
-
-Explained",ylim=c(0,1),type='b')
+Explained", main="PrincipalComponent vs. Cumulative Proportion of Variance
+Explained", ylim=c(0,1),type='b')
   })
 
   #Biplot
@@ -478,7 +486,7 @@ Explained",ylim=c(0,1),type='b')
 
     scaled_data <- scale(data)
     data.prc <- prcomp(scaled_data)
-    biplot(data.prc, scale=0)
+    biplot(data.prc, scale=0, main="PC1 vs. PC2")
 
     })
 
@@ -507,7 +515,7 @@ Explained",ylim=c(0,1),type='b')
       verbose = TRUE,
       max_iter = input$Iteration
     )
-    tsneplot <- plot(tsne$Y, type = "p")
+    tsneplot <- plot(tsne$Y, type = "p", main="t-SNE Plot")
   })
   
   output$som <- renderPlot({
