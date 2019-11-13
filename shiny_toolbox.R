@@ -268,8 +268,8 @@ ui <- fluidPage(
                   tabPanel("t-SNE", value=3 , plotOutput("tsne_plot")),
                   tabPanel("K-Means", value=4, plotOutput("k_cluster"), plotOutput("k_cluster_total") ),
                   tabPanel("HC-Heatmap", value=5, plotOutput("heatmap")),
-                  tabPanel("HC-SOM", value = 6, plotOutput("som"), plotOutput("som_cluster")),
-                  tabPanel("HC-Tree", value=7, plotOutput("tree"), br(), verbatimTextOutput("tree_cut"))
+                  tabPanel("HC-Tree", value=7, plotOutput("tree"), verbatimTextOutput("tree_cut")),
+                  tabPanel("SOM", value = 6, plotOutput("som"), plotOutput("som_cluster"))
       )
 
     )
@@ -314,6 +314,7 @@ server <- function(input, output) {
                 selected = names(datasetInput())[[2]])
   })
 
+# Heatmap (Hirarchical Clustering) ==================================================================
   output$heatmap <- renderPlot({
 
     data <- datasetInput()
@@ -360,7 +361,7 @@ server <- function(input, output) {
     cutree(hc1, k = input$tree_k, h = input$tree_h)
   })
   
-# K-means
+# K-means Clustering ==================================================================
   output$k_cluster <- renderPlot({
 
     # Read local, online or default dataset
