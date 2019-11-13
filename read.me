@@ -7,13 +7,14 @@
 **********************************
 
 	1. Introduction
-	2. Choose a dataset
-	3. Apply methods
-	 3.1 K-Means Clustering
-	 3.2 Hierarchical Clustering (HC)
-	 3.3 Principal Component Analysis (PCA)
-	 3.4 t-Distributed Stochastic Neighbor Embedding (tSNE))
-	 3.5 Self-Organizing Maps (SOMs)
+	2. Required packages
+	3. Choose a dataset
+	4. Apply methods
+	 4.1 K-Means Clustering
+	 4.2 Hierarchical Clustering (HC)
+	 4.3 Principal Component Analysis (PCA)
+	 4.4 t-Distributed Stochastic Neighbor Embedding (tSNE))
+	 4.5 Self-Organizing Maps (SOMs)
 	
 **********************************
 #      1. Introduction
@@ -23,9 +24,20 @@ Thank you very much for using our machine learning toolbox.
 This Toolbox has been created as part of our course "Applied Machine Learning and Predictive Modelling 2" at the Lucerne University of Applied Sciences and Arts.
 The focus of this toolbox is to aid you with your unsupervised learning tasks.
 
+**********************************
+#      2. Required Packages
+**********************************
+
+To use this toolbox you first must install these R packages:
+
+	- "shiny"
+	- "kohonen"
+	- "ggplot2"
+	- "ggdendro"
+	- "Rtsne"
 
 **********************************
-#     2. Choose a dataset
+#     3. Choose a dataset
 **********************************
 The toolbox comes preloaded with a dummy dataset. To load your own data you can: 
 
@@ -36,7 +48,7 @@ The "DataSet" tab gives you an overview of the data included in the loaded set.
 Please be aware that this toolbox cannot handle categorical data. To use it, be sure that your data only consists of numerical values.
 
 **********************************
-#      3. Apply algorithms
+#      4. Apply algorithms
 **********************************
 
 The different tabs help you applying different algorithms to your data. This toolbox offers you these algorithms:
@@ -50,7 +62,7 @@ The different tabs help you applying different algorithms to your data. This too
 Each tab generates a plot as output. By using the sliders on the left hand side you can change the parameters.
 
 	**********************************
-	# 3.1 K-Means Clustering
+	# 4.1 K-Means Clustering
 	**********************************
 	
 	What it is:
@@ -68,7 +80,7 @@ Each tab generates a plot as output. By using the sliders on the left hand side 
 		- Iteratively move the centers to minimize the total within cluster variance (data-center distance)
 
 	**********************************
-	# 3.2 Hierarchical Clustering (HC)
+	# 4.2 Hierarchical Clustering (HC)
 	**********************************
 	
 	What it is:
@@ -88,7 +100,7 @@ Each tab generates a plot as output. By using the sliders on the left hand side 
 		- Often combined to heatmaps graphical representation
 		
 	**********************************
-	# 3.3 Principal Component Analysis 
+	# 4.3 Principal Component Analysis 
 				 (PCA)
 	**********************************
 
@@ -110,7 +122,7 @@ Each tab generates a plot as output. By using the sliders on the left hand side 
 	=> Data organization method for grouping variables with similar behaviour
 
 	**********************************
-	# 3.4 t-Distributed Stochastic 
+	# 4.4 t-Distributed Stochastic 
 		  Neighbor Embedding (tSNE))
 	**********************************
 	
@@ -134,7 +146,7 @@ Each tab generates a plot as output. By using the sliders on the left hand side 
 	=> Data organization method for grouping variables with similar behaviour (as in PCA, HC, K-means)
 	
 	**********************************
-	# 3.5 Self-Organizing Maps (SOMs)
+	# 4.5 Self-Organizing Maps (SOMs)
 	**********************************
 
 	What it is:
