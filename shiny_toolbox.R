@@ -34,6 +34,40 @@ z <- c(z1,z2,z3)
 i <- seq(1, length(y))
 data_def <- data.frame(x,y,z)
 
+helpPopup <- function(title, content,
+                      placement=c('right', 'top', 'left', 'bottom'),
+                      trigger=c('click', 'hover', 'focus', 'manual'),
+                      glue = NULL) {
+  
+  tagList(
+    singleton(
+      tags$head(
+        tags$script("$(function() { $(\"[data-toggle='popover']\").popover(); })")
+      )
+    ),
+    tags$a(
+      #  href = "#", class = "tip", `data-toggle` = "popover",
+      href = "#",
+      class = "btn btn-default", 
+      `data-toggle` = "popover",
+      title = title, 
+      `data-content` = content,
+      # added this parameter
+      `data-html` = TRUE, 
+      # 
+      `data-animation` = TRUE,
+      `data-placement` = match.arg(placement, several.ok=TRUE)[1],
+      `data-trigger` = match.arg(trigger, several.ok=TRUE)[1],  
+      glue, 
+      icon("question")
+    ),
+    # CB added for popup width control
+    tags$style(type='text/css', ".popover { width: 400px; relative; left: 320px !important; }")
+    # end add
+  )
+}
+
+
 # Define UI for application that draws a histogram
 ui <- fluidPage(
   tags$head(
@@ -63,84 +97,178 @@ ui <- fluidPage(
   # Sidebar with a slider input for number of bins 
   sidebarLayout(
     sidebarPanel(
-      conditionalPanel(condition = "input.tabs==3",
-      sliderInput("Perplexity",
-                  "Number of Perplexitys:",
-                  min = 2,
-                  max = 100,
-                  value = 10),
-      sliderInput("Epsilon",
-                  "Number of Epsilons:",
-                  min = 2,
-                  max = 100,
-                  value = 5),
-      sliderInput("Iteration",
-                  "Number of Iterations:",
-                  min = 2,
-                  max = 20,
-                  value = 5),
-      
-      tags$hr()),
-      
       conditionalPanel(condition = "input.tabs==1",
-      fileInput("file_local",
-                "Choose local CSV",
-                accept = c(
-                  "text/csv",
-                  "text/comma-separated-values,text/plain",
-                  ".csv")
+                       helpPopup("Import a data file", 
+                                 "
+                                 You can load a coma separated file (CSV) to be used in this Shiny App.
+                                 You can either load a file from your local machine or
+                                 by providing a direct link to your file. You will then
+                                 have to select which 'Dataset Source' to use, by default the Old Faithful Geyser Data
+                                 https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/faithful.html is used to populate this Shiny App.
+                                 Finally you can define the separator used in your CSV file, by default it is set to a comma ','
+                                 ",
+                                 placement='bottom', 
+                                 trigger='click', 
+                                 glue = "About this tab"
+                       ),
+                       tags$hr(),       
+                       
+                       fileInput("file_local",
+                                 "Choose local CSV",
+                                 accept = c(
+                                   "text/csv",
+                                   "text/comma-separated-values,text/plain",
+                                   ".csv")
+                       ),
+                       textInput("file_online",
+                                 "Choose online CSV",
+                                 "https://people.sc.fsu.edu/~jburkardt/data/csv/faithful.csv"),
+                       
+                       radioButtons("dataset",
+                                    "Dataset Source:",
+                                    c("Default" = "default",
+                                      "Local" = "local",
+                                      "Online" = "online")),
+                       
+                       textInput(inputId = "separator",
+                                 label = "Choose a separator for your file",
+                                 value = ","),
+                       
+                       tags$hr()),
+      conditionalPanel(condition = "input.tabs==2",
+                       helpPopup("PCA", 
+                                 paste("
+                                 When to use it? PCA is used first in exploration of multidimensional
+                                       data. It is an unsupervised, linear, non-parametric method
+                                       "),
+                                 placement='bottom', 
+                                 trigger='click', 
+                                 glue = "About this tab"
+                       )
       ),
-      textInput("file_online",
-                "Choose online CSV",
-                "https://people.sc.fsu.edu/~jburkardt/data/csv/faithful.csv"),
-      
-      radioButtons("dataset",
-                   "Dataset:",
-                   c("Default" = "default",
-                     "Local" = "local",
-                     "Online" = "online")),
-      
-      textInput(inputId = "separator",
-                label = "Choose a separator for your file",
-                value = ","),
-      
-        tags$hr()),
-      
+      conditionalPanel(condition = "input.tabs==3",
+                       helpPopup("T-SNE", 
+                                 paste("
+                                 When to use it? Exploration & visualization of data, well-suited for 
+                                 high-dimensional data. T-SNE is an ansupervised, non-linear, parametric
+                                 method for dimensionality reduction.
+                                 You can drag the slide inputs to increase and decrease the values
+                                 for: Perplexity, Epsilons, Iterations
+                                 More about T-SNE:
+                                       "),
+                                 placement='bottom', 
+                                 trigger='click', 
+                                 glue = "About this tab"
+                       ),
+                       tags$hr(),       
+                       sliderInput("Perplexity",
+                                   "Number of Perplexitys:",
+                                   min = 2,
+                                   max = 100,
+                                   value = 10),
+                       sliderInput("Epsilon",
+                                   "Number of Epsilons:",
+                                   min = 2,
+                                   max = 100,
+                                   value = 5),
+                       sliderInput("Iteration",
+                                   "Number of Iterations:",
+                                   min = 2,
+                                   max = 20,
+                                   value = 5),
+                       
+                       tags$hr()),                
       conditionalPanel(condition = "input.tabs==4",
-        uiOutput("selected_input_x_col"),
-        uiOutput("selected_input_y_col"),
-        
-        
-        sliderInput("k",
-                    "Number of clusters:",
-                    min = 1,
-                    max = 20,
-                    value = 3)),
+                       helpPopup("K-means", 
+                                 "
+                                 ● K-means is an ansupervised, parametric method (need to pre-specify K number of clusters).
+                                 ● When to use it? First exploration of multidimensional data (few assumptions needed, i.e., K)
+  
+                                 ● In this tab you can select which variable should be used for
+                                 the Y and X axis in K-means clustering. You can also select
+                                 into how many clusters you want to split your data into.
+                                 The 'X' in the graph represent the center of each cluster.
+                                 ",
+                                 placement='bottom', 
+                                 trigger='click', 
+                                 glue = "About this tab"
+                       ),
+                       tags$hr(),    
+                       uiOutput("selected_input_x_col"),
+                       uiOutput("selected_input_y_col"),
+                       
+                       
+                       sliderInput("k",
+                                   "Number of clusters:",
+                                   min = 1,
+                                   max = 20,
+                                   value = 3)),
+      conditionalPanel(condition = "input.tabs==5",
+                       helpPopup("Heatmap", 
+                                 "
+                                 ● What it is:
+                                 Unsupervised, non-parametric method (no need labelled data)
+                                 'Better' than K-means clustering, no need to specify K number of clusters a priori (goes through all K’s)
+                                 ● When to use it:
+                                 First exploration of multidimensional data (no assumptions needed).!
+                                ",
+                                 placement='bottom', 
+                                 trigger='click', 
+                                 glue = "About this tab"
+                       )
+      ),
       conditionalPanel(condition = "input.tabs==6",
-        sliderInput("tree_h",
-                    "Height of tree:",
-                    min = 1,
-                    max = 20,
-                    value = 3),
-        sliderInput("tree_k",
-                    "Cut of tree:",
-                    min = 1,
-                    max = 20,
-                    value = 3)
-                    )
+                       helpPopup("SOM - Self-Organizing Maps", 
+                                 "
+                                 ●What it is:
+                                  Unsupervised, nonlinear, parametric method
+                                  Type of artificial neural network
+                                  Somewhat similar to K-means (SOMs with a small number of nodes behave similar to K-means) Somewhat similar to PCA (can be considered a nonlinear generalization of PCA)
+                                  ●When to use it:
+                                  For data visualization of high-dimensional data
+                                 ",
+                                 placement='bottom', 
+                                 trigger='click', 
+                                 glue = "About this tab"
+                       )),
+      conditionalPanel(condition = "input.tabs==7",
+                       helpPopup("Tree", 
+                                 "
+                                         ● What it is:
+                                 Unsupervised, non-parametric method (no need labelled data)
+                                 'Better' than K-means clustering, no need to specify K number of clusters a priori (goes through all K’s)
+                                 ● When to use it:
+                                 First exploration of multidimensional data (no assumptions needed).!
+                                   ",
+                                 placement='bottom', 
+                                 trigger='click', 
+                                 glue = "About this tab"
+                       ),
+                       tags$hr(),
+                       sliderInput("tree_h",
+                                   "Height of tree:",
+                                   min = 1,
+                                   max = 20,
+                                   value = 3),
+                       sliderInput("tree_k",
+                                   "Cut of tree:",
+                                   min = 1,
+                                   max = 20,
+                                   value = 3)
+      )
     ),
     
-     # Show a plot of the generated distribution
+    # Show a plot of the generated distribution
     mainPanel(
       # Output: Tabset w/ plot, summary, and table ----
       tabsetPanel(type = "tabs", id = "tabs",
                   tabPanel("DataSet", value=1, br(), verbatimTextOutput("summary"), verbatimTextOutput("strucutre"), tableOutput("view")),
-                  tabPanel("PCA", plotOutput("pcaplot", width = "1200px"), plotOutput("pca_variance_plot", width = "1200px")),
+                  tabPanel("PCA", value=2, plotOutput("pcaplot", width = "1200px"), plotOutput("pca_variance_plot", width = "1200px")),
                   tabPanel("t-SNE", value=3 , plotOutput("tsne_plot", height = "800px")),
                   tabPanel("K-means", value=4, plotOutput("k_cluster"), plotOutput("k_cluster_total") ),
-                  tabPanel("Absolutely-positioned panel", plotOutput("heatmap", height = "800px", width = "auto")),
-                  tabPanel("SOM", plotOutput("som")),
-                  tabPanel("Tree", value=6, plotOutput("tree"), verbatimTextOutput("tree_cut"))
+                  tabPanel("Absolutely-positioned panel", value=5, plotOutput("heatmap", height = "800px", width = "auto")),
+                  tabPanel("Self-Organizing Maps", value=6, plotOutput("som")),
+                  tabPanel("Tree", value=7, plotOutput("tree"), verbatimTextOutput("tree_cut"))
       )
       
     )
