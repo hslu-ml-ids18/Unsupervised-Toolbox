@@ -13,6 +13,7 @@
 library(shiny)
 library(kohonen)
 library(ggplot2)
+library(ggdendro)
 library(Rtsne)
 
 # Generate data as 3 separated groups
@@ -267,7 +268,7 @@ ui <- fluidPage(
                   tabPanel("K-Means", value=4, plotOutput("k_cluster"), plotOutput("k_cluster_total") ),
                   tabPanel("HC-Heatmap", value=5, plotOutput("heatmap")),
                   tabPanel("HC-SOM", value = 6, plotOutput("som"), plotOutput("som_cluster")),
-                  tabPanel("HC-Tree", value=7, plotOutput("tree"), verbatimTextOutput("tree_cut"))
+                  tabPanel("HC-Tree", value=7, plotOutput("tree"), plotOutput("tree_cut"))
       )
 
     )
@@ -320,12 +321,12 @@ server <- function(input, output) {
     data_scaled <- scale(data)
     hc1= hclust(dist(data_scaled))
 
-    plot(hc1)
+    ggdendrogram(hc1)
 
   })
 
   # Generate a summary of the dataset
-  output$tree_cut <- renderText({
+  output$tree_cut <- renderPlot({
 
     data <- datasetInput()
 
@@ -335,7 +336,14 @@ server <- function(input, output) {
     data_scaled <- scale(data)
     hc1= hclust(dist(data_scaled))
 
-    cutree(hc1, k = input$tree_k, h = input$tree_h)
+    #cutree(hc1, k = input$tree_k, h = input$tree_h)
+    
+    d <- cut(as.dendrogram(hc1), k = input$tree_k, h = input$tree_h)
+    par(mfrow=c(1, 2))
+    plot(d$lower[[1]])
+    plot(d$lower[[2]])
+    par(mfrow=c(1, 1))
+    
   })
 
   output$k_cluster <- renderPlot({
