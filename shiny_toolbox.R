@@ -16,6 +16,7 @@ library(ggplot2)
 library(Rtsne)
 
 # Generate data as 3 separated groups
+
 x1 <- 80 + rnorm(20, mean = 20, sd = 10)
 y1 <- 80 + rnorm(20, mean = 20, sd = 10)
 z1 <- 85 + rnorm(20, mean = 25, sd = 20)
@@ -33,177 +34,251 @@ z <- c(z1, z2, z3)
 i <- seq(1, length(y))
 data_def <- data.frame(x, y, z)
 
+helpPopup <- function(title, content,
+                      placement=c('right', 'top', 'left', 'bottom'),
+                      trigger=c('click', 'hover', 'focus', 'manual'),
+                      glue = NULL) {
+
+  tagList(
+    singleton(
+      tags$head(
+        tags$script("$(function() { $(\"[data-toggle='popover']\").popover(); })")
+      )
+    ),
+    tags$a(
+      #  href = "#", class = "tip", `data-toggle` = "popover",
+      href = "#",
+      class = "btn btn-default",
+      `data-toggle` = "popover",
+      title = title,
+      `data-content` = content,
+      # added this parameter
+      `data-html` = TRUE,
+      #
+      `data-animation` = TRUE,
+      `data-placement` = match.arg(placement, several.ok=TRUE)[1],
+      `data-trigger` = match.arg(trigger, several.ok=TRUE)[1],
+      glue,
+      icon("question")
+    ),
+    # CB added for popup width control
+    tags$style(type='text/css', ".popover { width: 400px; relative; left: 320px !important; }")
+    # end add
+  )
+}
+
+
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-  tags$head(tags$style(
-    HTML(
-      "
-                          @import url('//fonts.googleapis.com/css?family=Lato:700&display=swap');
-                          body {background-color: #c2d6d6;
-                          }
-                          h1 {
-                          font-family: 'Lato', sans-serif;
-                          font-weight: 500;
-                          line-height: 1.1;
-                          color: #50;
-                          }
-                          strong {
-                          font-family: Helvetica, Arial;
-                          font-weight: bold;
-                          color: #50;
-                          }
 
-                          "
-    )
-  )),
+  tags$head(
+    tags$style(HTML("
+                    @import url('//fonts.googleapis.com/css?family=Lato:700&display=swap');
+                    body {background-color: #c2d6d6;
+                    }
+                    h1 {
+                    font-family: 'Lato', sans-serif;
+                    font-weight: 500;
+                    line-height: 1.1;
+                    color: #50;
+                    }
+                    strong {
+                    font-family: Helvetica, Arial;
+                    font-weight: bold;
+                    color: #50;
+                    }
+
+                    "))
+    ),
   # Format the application title
   h1("Machine Learning 2 - Unsupervised Toolbox"),
   "by",
-  strong(
-    "Giuliano Ardesi, Lisa Becker, Anastasiia Chebatarova, Axel Kandel, Alexander Kusche"
-  ),
-  
+  strong("Giuliano Ardesi, Lisa Becker, Anastasiia Chebatarova, Axel Kandel, Alexander Kusche"),
+
   # Create sidebar with a slider input for number of bins
   sidebarLayout(
     sidebarPanel(
-      conditionalPanel(
-        condition = "input.tabs==3",
-        sliderInput(
-          "Perplexity",
-          "Number of Perplexitys:",
-          min = 2,
-          max = 100,
-          value = 10
-        ),
-        sliderInput(
-          "Epsilon",
-          "Number of Epsilons:",
-          min = 2,
-          max = 100,
-          value = 5
-        ),
-        sliderInput(
-          "Iteration",
-          "Number of Iterations:",
-          min = 2,
-          max = 20,
-          value = 5
-        ),
-        
-        tags$hr()
+      conditionalPanel(condition = "input.tabs==1",
+                       helpPopup("Import a data file",
+                                 "
+                                 You can load a coma separated file (CSV) to be used in this Shiny App.
+                                 You can either load a file from your local machine or
+                                 by providing a direct link to your file. You will then
+                                 have to select which 'Dataset Source' to use, by default the Old Faithful Geyser Data
+                                 https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/faithful.html is used to populate this Shiny App.
+                                 Finally you can define the separator used in your CSV file, by default it is set to a comma ','
+                                 ",
+                                 placement='bottom',
+                                 trigger='click',
+                                 glue = "About this tab"
+                       ),
+                       tags$hr(),
+
+                       fileInput("file_local",
+                                 "Choose local CSV",
+                                 accept = c(
+                                   "text/csv",
+                                   "text/comma-separated-values,text/plain",
+                                   ".csv")
+                       ),
+                       textInput("file_online",
+                                 "Choose online CSV",
+                                 "https://people.sc.fsu.edu/~jburkardt/data/csv/faithful.csv"),
+
+                       radioButtons("dataset",
+                                    "Dataset Source:",
+                                    c("Default" = "default",
+                                      "Local" = "local",
+                                      "Online" = "online")),
+
+                       textInput(inputId = "separator",
+                                 label = "Choose a separator for your file",
+                                 value = ","),
+
+                       tags$hr()),
+      conditionalPanel(condition = "input.tabs==2",
+                       helpPopup("PCA",
+                                 paste("
+                                 When to use it? PCA is used first in exploration of multidimensional
+                                       data. It is an unsupervised, linear, non-parametric method
+                                       "),
+                                 placement='bottom',
+                                 trigger='click',
+                                 glue = "About this tab"
+                       )
       ),
-      
-      conditionalPanel(
-        condition = "input.tabs==1",
-        fileInput(
-          "file_local",
-          "Choose local CSV",
-          accept = c("text/csv",
-                     "text/comma-separated-values,text/plain",
-                     ".csv")
-        ),
-        textInput(
-          "file_online",
-          "Choose online CSV",
-          "https://people.sc.fsu.edu/~jburkardt/data/csv/faithful.csv"
-        ),
-        
-        radioButtons(
-          "dataset",
-          "Dataset:",
-          c(
-            "Default" = "default",
-            "Local" = "local",
-            "Online" = "online"
-          )
-        ),
-        
-        textInput(
-          inputId = "separator",
-          label = "Choose a separator for your file",
-          value = ","
-        ),
-        
-        tags$hr()
+      conditionalPanel(condition = "input.tabs==3",
+                       helpPopup("T-SNE",
+                                 paste("
+                                 When to use it? Exploration & visualization of data, well-suited for
+                                 high-dimensional data. T-SNE is an ansupervised, non-linear, parametric
+                                 method for dimensionality reduction.
+                                 You can drag the slide inputs to increase and decrease the values
+                                 for: Perplexity, Epsilons, Iterations
+                                 More about T-SNE:
+                                       "),
+                                 placement='bottom',
+                                 trigger='click',
+                                 glue = "About this tab"
+                       ),
+                       tags$hr(),
+                       sliderInput("Perplexity",
+                                   "Number of Perplexitys:",
+                                   min = 2,
+                                   max = 100,
+                                   value = 10),
+                       sliderInput("Epsilon",
+                                   "Number of Epsilons:",
+                                   min = 2,
+                                   max = 100,
+                                   value = 5),
+                       sliderInput("Iteration",
+                                   "Number of Iterations:",
+                                   min = 2,
+                                   max = 20,
+                                   value = 5),
+
+                       tags$hr()),
+      conditionalPanel(condition = "input.tabs==4",
+                       helpPopup("K-means",
+                                 "
+                                 ● K-means is an ansupervised, parametric method (need to pre-specify K number of clusters).
+                                 ● When to use it? First exploration of multidimensional data (few assumptions needed, i.e., K)
+
+                                 ● In this tab you can select which variable should be used for
+                                 the Y and X axis in K-means clustering. You can also select
+                                 into how many clusters you want to split your data into.
+                                 The 'X' in the graph represent the center of each cluster.
+                                 ",
+                                 placement='bottom',
+                                 trigger='click',
+                                 glue = "About this tab"
+                       ),
+                       tags$hr(),
+                       uiOutput("selected_input_x_col"),
+                       uiOutput("selected_input_y_col"),
+
+
+                       sliderInput("k",
+                                   "Number of clusters:",
+                                   min = 1,
+                                   max = 20,
+                                   value = 3)),
+      conditionalPanel(condition = "input.tabs==5",
+                       helpPopup("Heatmap",
+                                 "
+                                 ● What it is:
+                                 Unsupervised, non-parametric method (no need labelled data)
+                                 'Better' than K-means clustering, no need to specify K number of clusters a priori (goes through all K’s)
+                                 ● When to use it:
+                                 First exploration of multidimensional data (no assumptions needed).!
+                                ",
+                                 placement='bottom',
+                                 trigger='click',
+                                 glue = "About this tab"
+                       )
       ),
-      
-      conditionalPanel(
-        condition = "input.tabs==4",
-        uiOutput("selected_input_x_col"),
-        uiOutput("selected_input_y_col"),
-        
-        
-        sliderInput(
-          "k",
-          "Number of clusters:",
-          min = 1,
-          max = 20,
-          value = 3
-        )
-      ),
-      conditionalPanel(
-        condition = "input.tabs==6",
-        sliderInput(
-          "tree_h",
-          "Height of tree:",
-          min = 1,
-          max = 20,
-          value = 3
-        ),
-        sliderInput(
-          "tree_k",
-          "Cut of tree:",
-          min = 1,
-          max = 20,
-          value = 3
-        )
+      conditionalPanel(condition = "input.tabs==6",
+                       helpPopup("SOM - Self-Organizing Maps",
+                                 "
+                                 ●What it is:
+                                  Unsupervised, nonlinear, parametric method
+                                  Type of artificial neural network
+                                  Somewhat similar to K-means (SOMs with a small number of nodes behave similar to K-means) Somewhat similar to PCA (can be considered a nonlinear generalization of PCA)
+                                  ●When to use it:
+                                  For data visualization of high-dimensional data
+                                 ",
+                                 placement='bottom',
+                                 trigger='click',
+                                 glue = "About this tab"
+                       )),
+      conditionalPanel(condition = "input.tabs==7",
+                       helpPopup("Tree",
+                                 "
+                                         ● What it is:
+                                 Unsupervised, non-parametric method (no need labelled data)
+                                 'Better' than K-means clustering, no need to specify K number of clusters a priori (goes through all K’s)
+                                 ● When to use it:
+                                 First exploration of multidimensional data (no assumptions needed).!
+                                   ",
+                                 placement='bottom',
+                                 trigger='click',
+                                 glue = "About this tab"
+                       ),
+                       tags$hr(),
+                       sliderInput("tree_h",
+                                   "Height of tree:",
+                                   min = 1,
+                                   max = 20,
+                                   value = 3),
+                       sliderInput("tree_k",
+                                   "Cut of tree:",
+                                   min = 1,
+                                   max = 20,
+                                   value = 3)
       )
     ),
-    
+
     # Show a plot of the generated distribution
     mainPanel(
-      # Output: Tabset w/ plot, summary, and table
-      tabsetPanel(
-        type = "tabs",
-        id = "tabs",
-        tabPanel(
-          "DataSet",
-          value = 1,
-          br(),
-          verbatimTextOutput("summary"),
-          verbatimTextOutput("strucutre"),
-          tableOutput("view")
-        ),
-        tabPanel(
-          "PCA",
-          plotOutput("pcaplot", width = "1200px"),
-          plotOutput("pca_variance_plot", width = "1200px")
-        ),
-        tabPanel("t-SNE", value = 3 , plotOutput("tsne_plot", height = "800px")),
-        tabPanel(
-          "K-means",
-          value = 4,
-          plotOutput("k_cluster"),
-          plotOutput("k_cluster_total")
-        ),
-        tabPanel(
-          "Absolutely-positioned panel",
-          plotOutput("heatmap", height = "800px", width = "auto")
-        ),
-        tabPanel("SOM", plotOutput("som")),
-        tabPanel(
-          "Tree",
-          value = 6,
-          plotOutput("tree"),
-          verbatimTextOutput("tree_cut")
-        )
+      # Output: Tabset w/ plot, summary, and table ----
+      tabsetPanel(type = "tabs", id = "tabs",
+                  tabPanel("DataSet", value=1, br(), verbatimTextOutput("summary"), verbatimTextOutput("strucutre"), tableOutput("view")),
+                  tabPanel("PCA", plotOutput("pcaplot"), value=2, plotOutput("pca_variance_plot")),
+                  tabPanel("t-SNE", value=3 , plotOutput("tsne_plot")),
+                  tabPanel("K-Means", value=4, plotOutput("k_cluster"), plotOutput("k_cluster_total") ),
+                  tabPanel("HC-Heatmap", value=5, plotOutput("heatmap")),
+                  tabPanel("HC-SOM", value = 6, plotOutput("som"), plotOutput("som_cluster")),
+                  tabPanel("HC-Tree", value=7, plotOutput("tree"), verbatimTextOutput("tree_cut"))
       )
+
     )
   )
 )
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+
   # Return the requested dataset
   datasetInput <- reactive({
     switch(
@@ -221,14 +296,14 @@ server <- function(input, output) {
       data_def
     )
   })
-  
+
   selectedData <- reactive({
     datasetInput()[, c(input$xcol, input$ycol)]
   })
+
   
   
   # Create a dynamic dropdown list
-  
   output$selected_input_x_col <- renderUI({
     selectInput('xcol', 'X Variable', names(datasetInput()))
   })
@@ -238,10 +313,11 @@ server <- function(input, output) {
                 names(datasetInput()),
                 selected = names(datasetInput())[[2]])
   })
-  
+
   output$heatmap <- renderPlot({
+
     data <- datasetInput()
-    
+
     # Keep only the numerical data
     data <- data[, purrr::map_lgl(data, is.numeric)]
     
@@ -253,24 +329,27 @@ server <- function(input, output) {
       scale = "none"
     )
   })
-  
+
   output$tree <- renderPlot({
+
     data <- datasetInput()
-    
+
     # Keep only the numerical data
-    data <- data[, purrr::map_lgl(data, is.numeric)]
-    
+    data <- data[ , purrr::map_lgl(data, is.numeric)]
+
     data_scaled <- scale(data)
-    hc1 = hclust(dist(data_scaled))
-    
+    hc1= hclust(dist(data_scaled))
+
+
     plot(hc1)
-    
+
   })
-  
+
   # Generate a summary of the dataset
   output$tree_cut <- renderText({
+
     data <- datasetInput()
-    
+
     # Keep only the numerical data
     data <- data[, purrr::map_lgl(data, is.numeric)]
     
@@ -282,40 +361,35 @@ server <- function(input, output) {
   
 # K-means
   output$k_cluster <- renderPlot({
+
     # Read local, online or default dataset
     data <- datasetInput()
-    
+
     # Keep only the numerical data
     data <- data[, purrr::map_lgl(data, is.numeric)]
-    
+ 
     # Choose column 2 and 3, skipping column 1 (assuming its an index)
     data <- selectedData()
-    
+
     # Run K-means plot
-    km.out <- kmeans(data, input$k, nstart = 50)
-    plot (
-      data,
-      col = (km.out$cluster + 1),
-      main = "K-Means Clustering" ,
-      xlab = names(data)[1] ,
-      ylab = names(data)[2] ,
-      pch = 20 ,
-      cex = 2
-    )
-    points(km.out$centers,
-           pch = 4,
-           cex = 4,
-           lwd = 4)
-    
+    km.out <- kmeans(data,input$k,nstart =50)
+    plot (data, col =(km.out$cluster+1),
+          main ="K-Means Clustering" ,
+          xlab =names(data)[1] , ylab =names(data)[2] ,
+          pch =20 , cex =2)
+    points(km.out$centers, pch = 4, cex = 4, lwd = 4)
+
   })
-  
+
   output$k_cluster_total <- renderPlot({
+
+
     #read dataset
     data <- datasetInput()
-    
+
     # Keep only the numerical data
-    data <- data[, purrr::map_lgl(data, is.numeric)]
-    
+    data <- data[ , purrr::map_lgl(data, is.numeric)]
+
     # Run total within-cluster sum of squares plot
     List_y <- list()
     List_x <- list()
@@ -329,21 +403,21 @@ server <- function(input, output) {
          typ = "b",
          xlab = "Number of Clusters",
          ylab = "Total within-cluster sum of squares")
+
   })
-  
+
   # Generate a summary of the dataset
   output$summary <- renderPrint({
     data <- datasetInput()
     summary(data)
     
   })
-  
-  
+
   # Return the requested dataset
   output$view <- renderTable({
     head(datasetInput())
   })
-  
+
   # Show the first "n" observations
   output$strucutre <- renderPrint({
     str(datasetInput())
@@ -351,65 +425,70 @@ server <- function(input, output) {
   
   
   
-  #Principal Component Analysis (PCA) =============================================================
+#Principal Component Analysis (PCA) =============================================================
   output$pca_variance_plot <- renderPlot({
+
     # Read local, online or default dataset
     data <- datasetInput()
-    
-    rownames(data) = raw[, 1]
-    
-    # Get mean and variance in every column of the dataset
-    apply(data, 2, mean)
-    apply(data, 2, var)
-    
-    
-    # Computing PCA
-    scaled_data = as.matrix(scale(data))
-    data.prc <- prcomp(scaled_data)
-    names(data.prc)
-    
-    # Standard deviation and means of the variables that were used for scaling prior to implementing PCA:
-    data.prc$center
-    data.prc$scale
-    
+
+    # apply() function allows to apply a function, mean()/var(), to each row (1) or column (2) of the data set
+    apply(data,2,mean)
+    apply(data,2,var)
+
+    # Compute PCA.
+    # scale=TRUE to scale the variables to have standard deviation = 1 pr.out=prcomp(USArrests,scale=TRUE)
+    pr.out=prcomp(USArrests,scale=TRUE)
+
+    # scale=TRUE to scale the variables to have standard deviation = 1 pr.out=prcomp(USArrests,scale=TRUE)
+    names(pr.out)
+
+    # Access all stuff computed by PCA.
+    # Means and standard deviations of the variables that were used for scaling prior to implementing PCA. pr.out$center
+    pr.out$scale
     # Rotation matrix provides the principal component of the loadings.
-    dim(data.prc$rotation)
-    data.prc$rotation
-    
-    # x matrix provides the principal component of the scores.
-    dim(data.prc$x)
-    data.prc$x
-    
-    # Get standard deviation and variance of PCA
-    data.prc$sdev
-    data.prc_var = data.prc$sdev ^ 2
-    data.prc_var
-    
+    dim(pr.out$rotation)
+    pr.out$rotation
+    # x matrix provides the principal component of the scores. dim(pr.out$x)
+    pr.out$x
+    # Biplot, scale=0 ensures that the arrows are scaled to represent the loadings; other values for scale give slightly different biplots with different interpretations.
+    biplot(pr.out,scale=0)
+
+    # This is to make the figure look like in the book, mirrored, for some reason, it does not change the significance.
+    pr.out$rotation=-pr.out$rotation
+    pr.out$x=-pr.out$x
+    biplot(pr.out,scale=0)
+    # From PCA, get the standard deviation, and variance.
+    pr.out$sdev
+    pr.var=pr.out$sdev^2
+    #pr.var
     # In order to compute the proportion of variance explained by each principal component (variance explained by each principal component / total variance explained by all four principal components)
-    pve = data.prc_var / sum(data.prc_var)
-    
-    pca_variance_plot <-
-      plot(
-        cumsum(pve),
-        xlab = "PrincipalComponent",
-        ylab = "Cumulative Proportion of Variance
-      Explained",
-        ylim = c(0, 1),
-        type = 'b'
-      )
+    pve=pr.var/sum(pr.var)
+    #pve
+    plot(pve,xlab="Principal Component",ylab="Proportion of Variance Explained",ylim=c(0,1),type='b')
+    plot(cumsum(pve),xlab="PrincipalComponent",ylab="Cumulative Proportion of Variance
+
+Explained",ylim=c(0,1),type='b')
   })
-  
-  # Biplot
+
+  #Biplot
   output$pcaplot <- renderPlot({
-    biplot(data.prc, scale = 0)
-  })
-  
-  # T-distributed stochastic neighbor embedding(T-SNE) =============================================================
-  # Create a t-sne plot of the dataset
+
+    # read local, online or default dataset
+    data <- datasetInput()
+
+    scaled_data <- scale(data)
+    data.prc <- prcomp(scaled_data)
+    biplot(data.prc, scale=0)
+
+    })
+
+  # Create a tsna plot of the dataset
   output$tsne_plot <- renderPlot({
+
+
     # Read local, online or default dataset
     data <- datasetInput()
-    
+
     # Keep only the numerical data
     data <- data[, purrr::map_lgl(data, is.numeric)]
     
@@ -443,6 +522,7 @@ server <- function(input, output) {
     colors <- c("red", "black", "blue")
     colors <- colors[as.numeric(data$Item)]
     data_train_matrix <- as.matrix(scale(data))
+
     
     # Self-Organizing Maps (SOM) =============================================================
     
@@ -529,10 +609,8 @@ server <- function(input, output) {
     add.cluster.boundaries(som_model, som_cluster)
     
   })
-  
-  
+
 }
 
 # Run the application
 shinyApp(ui = ui, server = server)
-
