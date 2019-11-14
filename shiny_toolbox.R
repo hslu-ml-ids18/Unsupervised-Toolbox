@@ -502,7 +502,7 @@ Explained", ylim=c(0,1),type='b')
 
     })
 
-# T-distributed stochastic nearest neighbor ==================================================================
+# T-distributed stochastic nearest neighbor (T-Sne) ==================================================================
   # Create a tsne plot of the dataset
   output$tsne_plot <- renderPlot({
 
