@@ -452,19 +452,19 @@ server <- function(input, output) {
     apply(data,2,var)
 
     # Compute PCA.
-    # scale=TRUE to scale the variables to have standard deviation = 1 pr.out=prcomp(USArrests,scale=TRUE)
+    # scale=TRUE to scale the variables to have standard deviation = 1
     pr.out=prcomp(USArrests,scale=TRUE)
 
-    # scale=TRUE to scale the variables to have standard deviation = 1 pr.out=prcomp(USArrests,scale=TRUE)
+    # scale=TRUE to scale the variables to have standard deviation = 1
     names(pr.out)
 
     # Access all stuff computed by PCA.
-    # Means and standard deviations of the variables that were used for scaling prior to implementing PCA. pr.out$center
+    # Means and standard deviations of the variables that were used for scaling prior to implementing PCA. 
     pr.out$scale
     # Rotation matrix provides the principal component of the loadings.
     dim(pr.out$rotation)
     pr.out$rotation
-    # x matrix provides the principal component of the scores. dim(pr.out$x)
+    # x matrix provides the principal component of the scores.
     pr.out$x
     # Biplot, scale=0 ensures that the arrows are scaled to represent the loadings; other values for scale give slightly different biplots with different interpretations.
     biplot(pr.out,scale=0)
