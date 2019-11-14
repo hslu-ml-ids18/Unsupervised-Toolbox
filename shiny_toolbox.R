@@ -255,11 +255,6 @@ ui <- fluidPage(
                                    "Height of tree:",
                                    min = 1,
                                    max = 20,
-                                   value = 3),
-                       sliderInput("tree_k",
-                                   "Cut of tree:",
-                                   min = 1,
-                                   max = 20,
                                    value = 3)
       )
     ),
@@ -368,7 +363,7 @@ server <- function(input, output) {
 
     #cutree(hc1, k = input$tree_k, h = input$tree_h)
     
-    d <- cut(as.dendrogram(hc1), k = input$tree_k, h = input$tree_h)
+    d <- cut(as.dendrogram(hc1),  h = input$tree_h)
     par(mfrow=c(1, 2))
     plot(d$lower[[1]])
     plot(d$lower[[2]])
