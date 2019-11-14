@@ -9,7 +9,7 @@
 
 # Prep work ==================================================================
 
-# Load the required packages
+# Required packages
 library(shiny)
 library(kohonen)
 library(ggplot2)
@@ -137,8 +137,10 @@ ui <- fluidPage(
       conditionalPanel(condition = "input.tabs==2",
                        helpPopup("PCA",
                                  paste("
-                                 When to use it? PCA is used first in exploration of multidimensional
-                                       data. It is an unsupervised, linear, non-parametric method
+                                 What it is?
+                                 It is an unsupervised, linear, non-parametric method
+                                 When to use it?
+                                 PCA is used first in exploration of multidimensional data.  
                                        "),
                                  placement='bottom',
                                  trigger='click',
@@ -148,12 +150,14 @@ ui <- fluidPage(
       conditionalPanel(condition = "input.tabs==3",
                        helpPopup("T-SNE",
                                  paste("
-                                 When to use it? Exploration & visualization of data, well-suited for
-                                 high-dimensional data. T-SNE is an ansupervised, non-linear, parametric
+                                 What it is?
+                                 T-SNE is an ansupervised, non-linear, parametric
+                                 When to use it?
+                                 Exploration & visualization of data, well-suited for
+                                 high-dimensional data. 
                                  method for dimensionality reduction.
                                  You can drag the slide inputs to increase and decrease the values
                                  for: Perplexity, Epsilons, Iterations
-                                 More about T-SNE:
                                        "),
                                  placement='bottom',
                                  trigger='click',
@@ -180,10 +184,11 @@ ui <- fluidPage(
       conditionalPanel(condition = "input.tabs==4",
                        helpPopup("K-means",
                                  "
-                                 ● K-means is an ansupervised, parametric method (need to pre-specify K number of clusters).
-                                 ● When to use it? First exploration of multidimensional data (few assumptions needed, i.e., K)
-
-                                 ● In this tab you can select which variable should be used for
+                                 What it is?
+                                 K-means is an ansupervised, parametric method (need to pre-specify K number of clusters).
+                                 When to use it?
+                                 First exploration of multidimensional data (few assumptions needed, i.e., K)
+                                 In this tab you can select which variable should be used for
                                  the Y and X axis in K-means clustering. You can also select
                                  into how many clusters you want to split your data into.
                                  The 'X' in the graph represent the center of each cluster.
@@ -196,7 +201,6 @@ ui <- fluidPage(
                        uiOutput("selected_input_x_col"),
                        uiOutput("selected_input_y_col"),
 
-
                        sliderInput("k",
                                    "Number of clusters:",
                                    min = 1,
@@ -205,10 +209,10 @@ ui <- fluidPage(
       conditionalPanel(condition = "input.tabs==5",
                        helpPopup("Heatmap",
                                  "
-                                 ● What it is:
+                                 What it is?
                                  Unsupervised, non-parametric method (no need labelled data)
                                  'Better' than K-means clustering, no need to specify K number of clusters a priori (goes through all K’s)
-                                 ● When to use it:
+                                 When to use it?
                                  First exploration of multidimensional data (no assumptions needed).!
                                 ",
                                  placement='bottom',
@@ -219,11 +223,11 @@ ui <- fluidPage(
       conditionalPanel(condition = "input.tabs==6",
                        helpPopup("SOM - Self-Organizing Maps",
                                  "
-                                 ●What it is:
+                                  What it is?
                                   Unsupervised, nonlinear, parametric method
                                   Type of artificial neural network
                                   Somewhat similar to K-means (SOMs with a small number of nodes behave similar to K-means) Somewhat similar to PCA (can be considered a nonlinear generalization of PCA)
-                                  ●When to use it:
+                                  When to use it?
                                   For data visualization of high-dimensional data
                                  ",
                                  placement='bottom',
@@ -233,11 +237,11 @@ ui <- fluidPage(
       conditionalPanel(condition = "input.tabs==7",
                        helpPopup("Tree",
                                  "
-                                         ● What it is:
+                                 What it is?
                                  Unsupervised, non-parametric method (no need labelled data)
                                  'Better' than K-means clustering, no need to specify K number of clusters a priori (goes through all K’s)
-                                 ● When to use it:
-                                 First exploration of multidimensional data (no assumptions needed).!
+                                 When to use it?
+                                 First exploration of multidimensional data (no assumptions needed).
                                    ",
                                  placement='bottom',
                                  trigger='click',
