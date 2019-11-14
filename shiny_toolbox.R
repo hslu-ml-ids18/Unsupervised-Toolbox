@@ -139,7 +139,7 @@ ui <- fluidPage(
       conditionalPanel(condition = "input.tabs==2",
                        helpPopup("PCA",
                                  paste("
-                                 What it is?
+                                 What is it?
                                  It is an unsupervised, linear, non-parametric method
                                  When to use it?
                                  PCA is used first in exploration of multidimensional data.  
@@ -152,7 +152,7 @@ ui <- fluidPage(
       conditionalPanel(condition = "input.tabs==3",
                        helpPopup("T-SNE",
                                  paste("
-                                 What it is?
+                                 What is it?
                                  T-SNE is an ansupervised, non-linear, parametric
                                  When to use it?
                                  Exploration & visualization of data, well-suited for
@@ -186,7 +186,7 @@ ui <- fluidPage(
       conditionalPanel(condition = "input.tabs==4",
                        helpPopup("K-means",
                                  "
-                                 What it is?
+                                 What is it?
                                  K-means is an ansupervised, parametric method (need to pre-specify K number of clusters).
                                  When to use it?
                                  First exploration of multidimensional data (few assumptions needed, i.e., K)
@@ -211,7 +211,7 @@ ui <- fluidPage(
       conditionalPanel(condition = "input.tabs==5",
                        helpPopup("Heatmap",
                                  "
-                                 What it is?
+                                 What is it?
                                  Unsupervised, non-parametric method (no need labelled data)
                                  'Better' than K-means clustering, no need to specify K number of clusters a priori (goes through all K’s)
                                  When to use it?
@@ -225,7 +225,7 @@ ui <- fluidPage(
       conditionalPanel(condition = "input.tabs==6",
                        helpPopup("SOM - Self-Organizing Maps",
                                  "
-                                  What it is?
+                                  What is it?
                                   Unsupervised, nonlinear, parametric method
                                   Type of artificial neural network
                                   Somewhat similar to K-means (SOMs with a small number of nodes behave similar to K-means) Somewhat similar to PCA (can be considered a nonlinear generalization of PCA)
@@ -239,7 +239,7 @@ ui <- fluidPage(
       conditionalPanel(condition = "input.tabs==7",
                        helpPopup("Tree",
                                  "
-                                 What it is?
+                                 What is it?
                                  Unsupervised, non-parametric method (no need labelled data)
                                  'Better' than K-means clustering, no need to specify K number of clusters a priori (goes through all K’s)
                                  When to use it?
