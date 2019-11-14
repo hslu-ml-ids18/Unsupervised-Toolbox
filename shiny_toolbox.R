@@ -9,12 +9,9 @@
 
 # Prep work ==================================================================
 
-# Required packages
-library(shiny)
-library(kohonen)
-library(ggplot2)
-library(ggdendro)
-library(Rtsne)
+# Installing package management tool "Pacman" to aquire all necessary packages to run the toolbox
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(shiny, kohonen, ggplot2, ggdendro, Rtsne)
 
 # Generate data as 3 separated groups
 
