@@ -277,6 +277,7 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+  options(shiny.maxRequestSize=30*1024^2) 
 
   # Return the requested dataset
   datasetInput <- reactive({
